@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+yfinance
+googlesearch-python
+pygooglenews
+vaderSentiment
+markdown2
