@@ -2,9 +2,9 @@
 
 Welcome to Swipe APIs - your comprehensive solution for financial data, web search, and news aggregation. Built for developers who demand reliability, speed, and comprehensive data coverage.
 
-[![API Status](https://img.shields.io/badge/status-production-brightgreen)](https://swipeapis-psi.vercel.app)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://swipeapis-psi.vercel.app)
-[![Uptime](https://img.shields.io/badge/uptime-99.9%25-brightgreen)](https://swipeapis-psi.vercel.app)
+[![API Status](https://img.shields.io/badge/status-production-brightgreen)](https://swipeapis.vercel.app)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://swipeapis.vercel.app)
+[![Uptime](https://img.shields.io/badge/uptime-99.9%25-brightgreen)](https://swipeapis.vercel.app)
 
 ## 🎯 Overview
 
@@ -16,7 +16,7 @@ Swipe APIs provides three powerful endpoints designed for production use:
 
 ### Base URL
 ```
-https://swipeapis-psi.vercel.app
+https://swipeapis.vercel.app
 ```
 
 ### Authentication
@@ -77,17 +77,17 @@ GET /finance/{ticker}
 
 **Basic stock quote:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/finance/AAPL"
+curl "https://swipeapis.vercel.app/finance/AAPL"
 ```
 
 **Specific fields with historical data:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/finance/TSLA?fields=price,market_cap,volume&history_days=30&interval=1d"
+curl "https://swipeapis.vercel.app/finance/TSLA?fields=price,market_cap,volume&history_days=30&interval=1d"
 ```
 
 **With analyst recommendations:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/finance/MSFT?include_recommendations=true"
+curl "https://swipeapis.vercel.app/finance/MSFT?include_recommendations=true"
 ```
 
 ### Response Example
@@ -169,17 +169,17 @@ GET /search/
 
 **Basic search:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/search/?q=machine learning tutorials"
+curl "https://swipeapis.vercel.app/search/?q=machine+learning+tutorials"
 ```
 
 **Paginated results:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/search/?q=Python FastAPI&num_results=20&start=10"
+curl "https://swipeapis.vercel.app/search/?q=Python+FastAPI&num_results=20&start=10"
 ```
 
 **Specific fields in Spanish:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/search/?q=inteligencia artificial&fields=url,title&language=es"
+curl "https://swipeapis.vercel.app/search/?q=inteligencia+artificial&fields=url,title&language=es"
 ```
 
 ### Response Example
@@ -256,22 +256,22 @@ GET /news/
 
 **Top headlines:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/news/"
+curl "https://swipeapis.vercel.app/news/"
 ```
 
 **Technology news with sentiment:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/news/?category=technology&include_sentiment=true&num_results=15"
+curl "https://swipeapis.vercel.app/news/?category=technology&include_sentiment=true&num_results=15"
 ```
 
 **Search with date range:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/news/?q=artificial intelligence&from_date=2025-08-01&to_date=2025-08-24"
+curl "https://swipeapis.vercel.app/news/?q=artificial+intelligence&from_date=2025-08-01&to_date=2025-08-24"
 ```
 
 **Regional news in specific language:**
 ```bash
-curl "https://swipeapis-psi.vercel.app/news/?region=DE&language=de&category=business"
+curl "https://swipeapis.vercel.app/news/?region=DE&language=de&category=business"
 ```
 
 ### Response Example
@@ -348,16 +348,16 @@ All endpoints return standardized error responses:
 import requests
 
 # Finance API
-response = requests.get('https://swipeapis-psi.vercel.app/finance/AAPL')
+response = requests.get('https://swipeapis.vercel.app/finance/AAPL')
 data = response.json()
 
 # Search API
-response = requests.get('https://swipeapis-psi.vercel.app/search/', 
+response = requests.get('https://swipeapis.vercel.app/search/', 
                        params={'q': 'Python tutorials'})
 results = response.json()
 
 # News API
-response = requests.get('https://swipeapis-psi.vercel.app/news/', 
+response = requests.get('https://swipeapis.vercel.app/news/', 
                        params={'category': 'technology'})
 articles = response.json()
 ```
@@ -366,17 +366,17 @@ articles = response.json()
 ```javascript
 // Using fetch API
 const getStockData = async (ticker) => {
-  const response = await fetch(`https://swipeapis-psi.vercel.app/finance/${ticker}`);
+  const response = await fetch(`https://swipeapis.vercel.app/finance/${ticker}`);
   return response.json();
 };
 
 const searchWeb = async (query) => {
-  const response = await fetch(`https://swipeapis-psi.vercel.app/search/?q=${query}`);
+  const response = await fetch(`https://swipeapis.vercel.app/search/?q=${query}`);
   return response.json();
 };
 
 const getNews = async (category) => {
-  const response = await fetch(`https://swipeapis-psi.vercel.app/news/?category=${category}`);
+  const response = await fetch(`https://swipeapis.vercel.app/news/?category=${category}`);
   return response.json();
 };
 ```
@@ -385,15 +385,15 @@ const getNews = async (category) => {
 ```bash
 # Get stock quote
 curl -H "Accept: application/json" \
-     "https://swipeapis-psi.vercel.app/finance/AAPL"
+     "https://swipeapis.vercel.app/finance/AAPL"
 
 # Search the web
 curl -H "Accept: application/json" \
-     "https://swipeapis-psi.vercel.app/search/?q=machine+learning"
+     "https://swipeapis.vercel.app/search/?q=machine+learning"
 
 # Get tech news
 curl -H "Accept: application/json" \
-     "https://swipeapis-psi.vercel.app/news/?category=technology"
+     "https://swipeapis.vercel.app/news/?category=technology"
 ```
 
 ---
