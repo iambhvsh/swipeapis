@@ -34,15 +34,19 @@ def google_search_service(
     try:
         # The googlesearch-python library is a generator-based scraper.
         # We pass advanced=True to get SearchResult objects instead of just URLs.
-        results_generator = google_search_lib(
-            q,
-            num_results=num_results,
-            lang=language,
-            start_num=start,
-            safe='active' if safe else 'off',
-            sleep_interval=2.0,  # A short pause to avoid being rate-limited.
-            advanced=True
-        )
+        try:
+            results_generator = google_search_lib(
+                q,
+                num_results=num_results,
+                lang=language,
+                start_num=start,
+                safe='active' if safe else 'off',
+                sleep_interval=2.0,  # A short pause to avoid being rate-limited.
+                advanced=True
+            )
+        except Exception as e:
+            # If the scraping library itself fails, raise a specific error.
+            raise SearchError(f"The underlying search library failed: {e}")
 
         # Determine which fields to return based on the 'fields' parameter.
         if fields:
