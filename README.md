@@ -235,7 +235,8 @@ GET /news/
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `q` | string | - | Search query for specific topics (optional) |
-| `num_results` | integer | `20` | Number of articles to return (1-100) |
+| `num_results` | integer | `10` | Number of articles to return (1-100) |
+| `start` | integer | `0` | Starting index for pagination |
 | `from_date` | string | - | Start date filter (YYYY-MM-DD) |
 | `to_date` | string | - | End date filter (YYYY-MM-DD) |
 | `language` | string | `en` | Article language (ISO 639-1) |
