@@ -13,36 +13,18 @@
     <style>
         /* --- Vercel Geist UI Inspired Styles --- */
         :root {
-            --bg-light: #ffffff;
-            --bg-dark: #000000;
-            --text-light: #000000;
-            --text-dark: #ffffff;
-            --panel-dark: #111111;
-            --border-light: #eaeaea;
-            --border-dark: #333333;
-            --accent: #0070f3;
-            --geist-gray: #666666;
+            --bg-light: #ffffff; --bg-dark: #000000; --text-light: #000000; --text-dark: #ffffff;
+            --panel-dark: #111111; --border-light: #eaeaea; --border-dark: #333333;
+            --accent: #0070f3; --geist-gray: #666666;
         }
-
         html, body { height: 100%; overflow: hidden; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.2s, color 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; transition: background-color 0.2s, color 0.2s; display: flex; flex-direction: column; }
         .light-theme { background-color: var(--bg-light); color: var(--text-light); }
         .dark-theme { background-color: var(--bg-dark); color: var(--text-dark); }
-
-        .panel {
-            transition: background-color 0.2s;
-            border-color: var(--border-light);
-        }
+        .panel { transition: background-color 0.2s; border-color: var(--border-light); }
         .dark-theme .panel { border-color: var(--border-dark); }
         .light-theme .panel { background-color: var(--bg-light); }
         .dark-theme .panel { background-color: var(--panel-dark); }
-
         .chat-bubble { max-width: 90%; padding: 10px 16px; border-radius: 12px; word-wrap: break-word; line-height: 1.6; }
         .user-bubble { background-color: var(--accent); color: white; }
         .stellar-bubble { background-color: transparent; padding: 0; }
@@ -50,78 +32,33 @@
         .stellar-bubble a:hover { background-color: var(--accent); color: white; }
         .stellar-bubble ul { list-style-position: inside; padding-left: 8px; }
         .stellar-bubble h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
-
         .toolbar-icon { cursor: pointer; transition: color 0.2s ease; color: var(--geist-gray); }
         .toolbar-icon:hover { color: var(--accent); }
-
-        .input-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            padding: 8px;
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            background-color: var(--bg-light);
-        }
-        .dark-theme .input-container {
-            border-color: var(--border-dark);
-            background-color: var(--bg-dark);
-        }
-        .input-container:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
-        }
-
-        .input-field {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            padding: 8px 48px 8px 40px;
-            font-size: 1rem;
-            line-height: 1.5;
-            resize: none;
-            overflow-y: hidden;
-        }
-
-        .input-icon {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--geist-gray);
-        }
+        .input-container { position: relative; display: flex; align-items: center; padding: 8px; border: 1px solid var(--border-light); border-radius: 12px; background-color: var(--bg-light); }
+        .dark-theme .input-container { border-color: var(--border-dark); background-color: var(--bg-dark); }
+        .input-container:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2); }
+        .input-field { flex-grow: 1; background: transparent; border: none; outline: none; padding: 8px 48px 8px 40px; font-size: 1rem; line-height: 1.5; resize: none; overflow-y: hidden; }
+        .input-icon { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; color: var(--geist-gray); }
         .input-icon.mic { left: 16px; }
         .input-icon.send { right: 16px; background-color: var(--accent); color: white; border-radius: 8px; padding: 6px; cursor: pointer; }
         .input-icon.send:hover { background-color: #0056b3; }
-
-
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
         .dark-theme ::-webkit-scrollbar-thumb { background: #444; }
-
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked+.slider { background-color: var(--accent); }
         input:checked+.slider:before { transform: translateX(20px); }
-
         .data-card { margin-top: 12px; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; }
         .dark-theme .data-card { border-color: var(--border-dark); }
         .news-article { margin-top: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
         .dark-theme .news-article { border-color: var(--border-dark); }
         .news-article:last-child { border-bottom: none; }
-
         .scrollable-table-container { overflow-x: auto; width: 100%; }
         .scrollable-table-container table { width: 100%; border-collapse: collapse; }
         .scrollable-table-container th, .scrollable-table-container td { padding: 8px 12px; border: 1px solid var(--border-light); }
@@ -132,10 +69,9 @@
 </head>
 
 <body class="light-theme">
-
     <div id="app-container" class="w-full h-full flex flex-col opacity-0">
         <header class="flex justify-between items-center text-center p-4 border-b panel">
-            <div class="w-10"></div> <!-- Spacer -->
+            <div class="w-10"></div>
             <h1 class="text-xl font-semibold tracking-tight">Stellar</h1>
             <div id="settings-btn" class="toolbar-icon w-10" title="Settings"><i class="material-icons">settings</i></div>
         </header>
@@ -150,37 +86,25 @@
             </div>
         </footer>
     </div>
-
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 p-6 rounded-2xl w-full max-w-md">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold">Settings</h2>
-                <button id="close-settings" class="toolbar-icon"><i class="material-icons">close</i></button>
-            </div>
+            <div class="flex justify-between items-center"><h2 class="text-xl font-bold">Settings</h2><button id="close-settings" class="toolbar-icon"><i class="material-icons">close</i></button></div>
             <div class="mt-6 space-y-6">
-                <div class="flex justify-between items-center">
-                    <span>Dark Mode</span>
-                    <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span>Clear Chat History</span>
-                    <button id="clear-history-btn" class="px-3 py-1 bg-red-500 text-white rounded-lg text-sm">Clear</button>
-                </div>
+                <div class="flex justify-between items-center"><span>Dark Mode</span><label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label></div>
+                <div class="flex justify-between items-center"><span>Clear Chat History</span><button id="clear-history-btn" class="px-3 py-1 bg-red-500 text-white rounded-lg text-sm">Clear</button></div>
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- CONFIGURATION ---
             const CONFIG = {
                 API_KEY: "AIzaSyCgX5yszHAZyBe9_S9GLw-JKXWSaUBqFsY",
-                PROXY_URL: 'https://blkproxy.vercel.app/api/proxy?url=',
                 API_BASE_URL: 'https://swipeapis.vercel.app',
                 MODEL_NAME: 'gemini-1.5-flash-latest'
             };
 
-            // --- GET ALL HTML ELEMENTS ---
+            // DOM Elements
             const chatMessages = document.getElementById('chat-messages');
             const chatInput = document.getElementById('chat-input');
             const sendButton = document.getElementById('send-button');
@@ -192,105 +116,11 @@
             const clearHistoryBtn = document.getElementById('clear-history-btn');
             const appContainer = document.getElementById('app-container');
 
+            // State
             let chatHistory = [];
             const availableTools = {};
 
-            // --- AUTO-RESIZING TEXTAREA ---
-            const adjustTextareaHeight = () => {
-                chatInput.style.height = 'auto';
-                const maxHeight = 200;
-                chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px';
-            };
-            chatInput.addEventListener('input', adjustTextareaHeight);
-
-            // --- Message Handling ---
-            const addMessage = (sender, message, isRawHtml = false, existingId = null) => {
-                const messageId = existingId || `msg-${Date.now()}-${Math.random()}`;
-                const messageElement = document.createElement('div');
-                messageElement.className = 'w-full flex fade-in';
-                messageElement.id = messageId;
-                const bubble = document.createElement('div');
-                bubble.className = 'chat-bubble';
-                if (sender === 'user') {
-                    messageElement.classList.add('justify-end');
-                    bubble.classList.add('user-bubble');
-                    bubble.textContent = message;
-                } else {
-                    messageElement.classList.add('justify-start');
-                    bubble.classList.add('stellar-bubble');
-                    bubble[isRawHtml ? 'innerHTML' : 'textContent'] = message;
-                }
-                messageElement.appendChild(bubble);
-                chatMessages.appendChild(messageElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                if (sender !== 'system' && !existingId) {
-                    chatHistory.push({ role: sender === 'user' ? 'user' : 'model', parts: [{ text: message }] });
-                    saveChatHistory();
-                }
-                return messageId;
-            };
-
-            const showTypingIndicator = (message = null) => {
-                hideTypingIndicator();
-                const typingElement = document.createElement('div');
-                typingElement.id = 'typing-indicator';
-                typingElement.className = 'w-full flex justify-start fade-in pl-4';
-                const content = message
-                    ? `<p class="text-sm text-gray-500 dark:text-gray-400">${message}</p>`
-                    : `<div class="chat-bubble stellar-bubble flex items-center space-x-1"><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span></div>`;
-                typingElement.innerHTML = content;
-                chatMessages.appendChild(typingElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            };
-            const hideTypingIndicator = () => document.getElementById('typing-indicator')?.remove();
-
-            const simpleMarkdownToHtml = (text) => {
-                if (!text) return '';
-                let html = text
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
-                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'); // Links
-
-                html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>'); // Lists
-                html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
-                html = html.replace(/<\/ul>\s*<ul>/g, '');
-
-                return html.replace(/\n/g, '<br>'); // Line breaks
-            };
-
-            // --- Main Logic ---
-            const handleSendMessage = async () => {
-                const userInput = chatInput.value.trim();
-                if (userInput === '') return;
-
-                addMessage('user', userInput);
-                chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
-
-                chatInput.value = '';
-                adjustTextareaHeight();
-                showTypingIndicator();
-
-                try {
-                    const finalResponse = await getStellarResponse();
-                    hideTypingIndicator();
-                    addMessage('stellar', simpleMarkdownToHtml(finalResponse), true);
-                    chatHistory.push({ role: 'model', parts: [{ text: finalResponse }] });
-                    saveChatHistory();
-                } catch (error) {
-                    hideTypingIndicator();
-                    console.error("Error from Stellar:", error);
-                    addMessage('stellar', 'I seem to be having trouble connecting. Please check your API key and try again.');
-                }
-            };
-
-            // --- NATIVE TOOL CALLING ARCHITECTURE ---
-            const getStellarResponse = async () => {
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL_NAME}:generateContent?key=${CONFIG.API_KEY}`;
-
-                const systemInstruction = {
-                    role: "system",
-                    parts: [{ text: `You are Stellar, a friendly, brilliant, and extremely capable personal AI assistant.
+            const SYSTEM_PROMPT = `You are Stellar, a friendly, brilliant, and extremely capable personal AI assistant.
 
                 ## Your Persona
                 - Your personality is helpful, friendly, curious, and slightly informal. You're like a super-smart friend who is amazing with technology.
@@ -303,7 +133,7 @@
                 - **Proactive Intelligence:** Be proactive. If a query is vague, infer the user's intent. "how's apple?" implies a stock check for AAPL. "latest news" implies top headlines.
                 - **Input Validation (MANDATORY):**
                     - **Ticker Symbols:** Before using a tool, validate stock symbols. If a symbol looks like a common company name or a typo, correct it to the official symbol. Examples: 'apple' -> 'AAPL', 'APPL' -> 'AAPL', 'google' -> 'GOOGL', 'microsoft' -> 'MSFT', 'nvidia' -> 'NVDA'.
-                    - **Dates:** You MUST validate dates. The current date is ${new Date().toLocaleDateString()}. Any request for HISTORICAL data for a date AFTER today is impossible. If a user asks for a future date, you MUST respond with a polite text message explaining that you cannot fetch data from the future. Do not attempt to call a tool with a future date.
+                    - **Dates:** You MUST validate dates. The current date and time is ${new Date().toISOString()}. Any request for HISTORICAL data for a date AFTER today is impossible. If a user asks for a future date, you MUST respond with a polite text message explaining that you cannot fetch data from the future. Do not attempt to call a tool with a future date.
 
                 ## Tool Delegation Strategy
                 Your main goal is to decide which tool to use based on the user's request.
@@ -320,154 +150,146 @@
                     - **Summarizing News:** This is a **two-step thought process**. AFTER getting news, if the user asks for a summary, you respond with a text message where you provide a list of the news titles and write a short summary for each one yourself. Do NOT call another tool.
                     - **"Show More" News:** There is no tool for this. You must look at the last news query in the history and call the \`fetch_news\` tool again with the same parameters, but incrementing the \`start\` index by 10.
 
-                4.  **General Web Search:** Use the \`google_search\` tool for all other general knowledge, real-time info, etc.` }]
-                };
+                4.  **General Web Search:** Use the \`google_search\` tool for all other general knowledge, real-time info, etc.`;
+
+            // --- UI Functions ---
+            const adjustTextareaHeight = () => {
+                chatInput.style.height = 'auto';
+                const maxHeight = 200;
+                chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px';
+            };
+            chatInput.addEventListener('input', adjustTextareaHeight);
+
+            const simpleMarkdownToHtml = (text) => {
+                if (!text) return '';
+                let html = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+                html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+                html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+                html = html.replace(/<\/ul>\s*<ul>/g, '');
+                return html.replace(/\n/g, '<br>');
+            };
+
+            const addMessage = (sender, message, isRawHtml = false, id = null) => {
+                const messageId = id || `msg-${Date.now()}-${Math.random()}`;
+                const messageElement = document.createElement('div');
+                messageElement.id = messageId;
+                messageElement.className = 'w-full flex fade-in';
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+
+                if (sender === 'user') {
+                    messageElement.classList.add('justify-end');
+                    bubble.classList.add('user-bubble');
+                    bubble.textContent = message;
+                } else {
+                    messageElement.classList.add('justify-start');
+                    bubble.classList.add('stellar-bubble');
+                    bubble[isRawHtml ? 'innerHTML' : 'textContent'] = message;
+                }
+                messageElement.appendChild(bubble);
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return messageId;
+            };
+
+            const updateMessage = (id, message, isRawHtml = false) => {
+                const bubble = document.getElementById(id)?.querySelector('.chat-bubble');
+                if(bubble) bubble[isRawHtml ? 'innerHTML' : 'textContent'] = message;
+
+                const historyItem = chatHistory.find(item => item.id === id);
+                if (historyItem) {
+                    historyItem.message = message;
+                    historyItem.isRawHtml = isRawHtml;
+                    historyItem.parts = [{ text: message }];
+                }
+            };
+
+            // --- Main Application Logic ---
+            const handleSendMessage = async () => {
+                const userInput = chatInput.value.trim();
+                if (userInput === '') return;
+
+                const userMsgId = addMessage('user', userInput);
+                chatHistory.push({ id: userMsgId, sender: 'user', role: 'user', parts: [{ text: userInput }], isRawHtml: false, message: userInput });
+
+                chatInput.value = '';
+                adjustTextareaHeight();
+                const stellarMsgId = addMessage('stellar', '...');
+
+                try {
+                    const finalResponseText = await getStellarResponse();
+                    const formattedResponse = simpleMarkdownToHtml(finalResponseText);
+                    updateMessage(stellarMsgId, formattedResponse, true);
+                    chatHistory.push({ id: stellarMsgId, sender: 'stellar', role: 'model', parts: [{ text: finalResponseText }], isRawHtml: true, message: formattedResponse });
+                    saveChatHistory();
+                } catch (error) {
+                    console.error("Error from Stellar:", error);
+                    const errorText = 'I seem to be having trouble connecting. Please try again.';
+                    updateMessage(stellarMsgId, errorText);
+                    chatHistory.push({ id: stellarMsgId, sender: 'stellar', role: 'model', parts: [{ text: errorText }], isRawHtml: false, message: errorText });
+                    saveChatHistory();
+                }
+            };
+
+            const getStellarResponse = async () => {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL_NAME}:generateContent?key=${CONFIG.API_KEY}`;
+
+                const apiHistory = chatHistory.map(item => ({role: item.role, parts: item.parts}));
+
+                const systemInstruction = { role: "system", parts: [{ text: SYSTEM_PROMPT }]};
 
                 const requestBody = {
-                    contents: [systemInstruction, ...chatHistory],
-                    tools: [{ functionDeclarations: toolDeclarations }]
+                    contents: [systemInstruction, ...apiHistory],
+                    tools: [{ functionDeclarations }]
                 };
 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API request failed: ${await response.text()}`);
-                }
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+                if (!response.ok) throw new Error(`API request failed: ${await response.text()}`);
 
                 const result = await response.json();
                 const candidate = result.candidates?.[0];
-
-                if (!candidate || !candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
-                    return "I'm sorry, I couldn't process that. Please try again.";
-                }
+                if (!candidate?.content?.parts?.[0]) return "I'm sorry, I couldn't process that.";
 
                 const part = candidate.content.parts[0];
-
                 if (part.functionCall) {
-                    const functionCall = part.functionCall;
-                    const functionName = functionCall.name;
-                    const functionArgs = functionCall.args;
-
-                    showTypingIndicator(`Using the ${functionName} tool...`);
-
-                    if (availableTools[functionName]) {
+                    const { name, args } = part.functionCall;
+                    if (availableTools[name]) {
                         try {
-                            const toolResult = await availableTools[functionName](functionArgs);
-
-                            chatHistory.push({
-                                role: 'model',
-                                parts: [{ functionCall }]
-                            });
-                            chatHistory.push({
-                                role: 'function',
-                                parts: [{ functionResponse: { name: functionName, response: { result: toolResult } } }]
-                            });
-
-                            // Recursively call to get the final text response from the model
+                            const toolResult = await availableTools[name](args);
+                            chatHistory.push({ role: 'model', parts: [{ functionCall: part.functionCall }] });
+                            chatHistory.push({ role: 'function', parts: [{ functionResponse: { name, response: { result: toolResult } } }] });
                             return await getStellarResponse();
-
-                        } catch (error) {
-                            console.error(`Error executing tool ${functionName}:`, error);
-                            return `There was an error while I was using the ${functionName} tool: ${error.message}`;
-                        }
-                    } else {
-                        return `I tried to use a tool called "${functionName}", but I don't have it available.`;
+                        } catch (error) { return `There was an error while using the ${name} tool: ${error.message}`; }
                     }
+                    return `I tried to use a tool called "${name}", but it's not available.`;
                 } else if (part.text) {
                     return part.text;
                 }
-
-                return "I'm not sure how to respond to that. Can you try rephrasing?";
+                return "I'm not sure how to respond to that.";
             };
 
             const fetchViaProxy = async (endpoint) => {
-                const finalUrl = CONFIG.PROXY_URL + encodeURIComponent(`${CONFIG.API_BASE_URL}${endpoint}`);
-                try {
-                    const response = await fetch(finalUrl);
-                    const data = await response.json();
-                    if (!response.ok) {
-                        const errorMessage = data.detail || `API request failed with status: ${response.status}`;
-                        throw new Error(errorMessage);
-                    }
-                    if (data.error) { throw new Error(data.error.message || 'An unknown API error occurred'); }
-                    return data;
-                } catch (error) {
-                    console.error(`Error fetching from ${endpoint}:`, error);
-                    throw error;
-                }
+                const finalUrl = `https://blkproxy.vercel.app/api/proxy?url=${encodeURIComponent(`${CONFIG.API_BASE_URL}${endpoint}`)}`;
+                const response = await fetch(finalUrl);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || `API request failed with status: ${response.status}`);
+                if (data.error) throw new Error(data.error.message || 'An unknown API error occurred');
+                return data;
             };
 
             const buildQueryString = (params) => new URLSearchParams(Object.fromEntries(Object.entries(params || {}).filter(([_, v]) => v != null))).toString();
 
-            // --- Tool Implementations ---
-            availableTools.google_search = async ({ query }) => {
-                return await fetchViaProxy(`/search/?q=${encodeURIComponent(query)}&${buildQueryString({})}`);
-            };
+            availableTools.google_search = async ({ query }) => fetchViaProxy(`/search/?q=${encodeURIComponent(query)}`);
+            availableTools.fetch_stock_data = async ({ ticker, start_date, end_date }) => fetchViaProxy(`/finance/${ticker.toUpperCase()}?${buildQueryString({start_date, end_date})}`);
+            availableTools.fetch_news = async ({ q, category, region, from_date, to_date, start }) => fetchViaProxy(`/news/?${buildQueryString({q, category, region, from_date, to_date, start})}`);
 
-            availableTools.fetch_stock_data = async ({ ticker, start_date, end_date }) => {
-                return await fetchViaProxy(`/finance/${ticker.toUpperCase()}?${buildQueryString({start_date, end_date})}`);
-            };
-
-            availableTools.fetch_news = async ({ q, category, region, from_date, to_date }) => {
-                return await fetchViaProxy(`/news/?${buildQueryString({q, category, region, from_date, to_date})}`);
-            };
-
-            // --- UI Formatting ---
-            const formatHistoricalStockDataAsHtml = (data) => {
-                const formatNumber = (num, options = {}) => num == null || isNaN(num) ? 'N/A' : new Intl.NumberFormat('en-US', options).format(num);
-                return `<div class="data-card"><strong>${new Date(data.date).toLocaleDateString()}</strong><div>Open: ${formatNumber(data.Open, { style: 'currency', currency: 'USD' })}</div><div>High: ${formatNumber(data.High, { style: 'currency', currency: 'USD' })}</div><div>Low: ${formatNumber(data.Low, { style: 'currency', currency: 'USD' })}</div><div>Close: ${formatNumber(data.Close, { style: 'currency', currency: 'USD' })}</div><div>Volume: ${formatNumber(data.Volume)}</div></div>`;
-            };
-
-            const formatStockDataAsHtml = (data) => {
-                const formatNumber = (num, options = {}) => num == null || isNaN(num) ? 'N/A' : new Intl.NumberFormat('en-US', options).format(num);
-                const price = parseFloat(data.price), prevClose = parseFloat(data.previous_close);
-                const change = (price != null && prevClose != null) ? price - prevClose : null;
-                const changePercent = (change != null && prevClose != null && prevClose !== 0) ? (change / prevClose) * 100 : null;
-                const changeColor = change >= 0 ? 'text-green-500' : 'text-red-500';
-                const changeSign = change >= 0 ? '+' : '';
-                return `<div class="data-card"><strong>${data.ticker}</strong><div>Price: ${formatNumber(price, { style: 'currency', currency: 'USD' })}</div><div class="${changeColor}">Change: ${changeSign}${formatNumber(change, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${changeSign}${formatNumber(changePercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)</div><div>P/E Ratio: ${formatNumber(data.pe_ratio, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div></div>`;
-            };
-
-            const formatNewsDataAsHtml = (data) => {
-                let articlesHtml = '<div class="data-card">';
-                if (!data.articles || data.articles.length === 0) return '<p>No articles found for this query.</p>';
-                data.articles.slice(0, 10).forEach(article => {
-                    articlesHtml += `<div class="news-article"><strong><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></strong><p class="text-xs">${article.source} - ${new Date(article.published).toLocaleDateString()}</p><p class="text-sm mt-1">${article.description}</p></div>`;
-                });
-                return articlesHtml + '</div>';
-            };
-
-            // --- Tool Definitions for Gemini ---
-            const toolDeclarations = [
-                {
-                    name: "google_search",
-                    description: "Get information from the web. Use for general knowledge, current events, weather, sports scores, etc.",
-                    parameters: { type: "OBJECT", properties: { query: { type: "STRING", description: "The search query." } }, required: ["query"] }
-                },
-                {
-                    name: "fetch_stock_data",
-                    description: "Get financial data for a stock ticker. Can be for the current day or a specific historical date.",
-                    parameters: { type: "OBJECT", properties: {
-                        ticker: { type: "STRING", description: "The stock ticker symbol, e.g., GOOGL, AAPL." },
-                        start_date: { type: "STRING", description: "The start date for historical data (YYYY-MM-DD). Use for single-day queries." },
-                        end_date: { type: "STRING", description: "The end date for historical data (YYYY-MM-DD). Use for date ranges." }
-                    }, required: ["ticker"] }
-                },
-                {
-                    name: "fetch_news",
-                    description: "Get news articles from around the world. Can be top headlines or articles matching a query, category, or date range.",
-                    parameters: { type: "OBJECT", properties: {
-                        q: { type: "STRING", description: "A specific search query for news." },
-                        category: { type: "STRING", description: "A news category, e.g., 'technology', 'business'." },
-                        region: { type: "STRING", description: "The two-letter region code, e.g., 'US', 'GB'." },
-                        from_date: { type: "STRING", description: "The start date for news articles (YYYY-MM-DD)." },
-                        to_date: { type: "STRING", description: "The end date for news articles (YYYY-MM-DD)." }
-                    }}
-                }
+            const functionDeclarations = [
+                { name: "google_search", description: "Get information from the web.", parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+                { name: "fetch_stock_data", description: "Get financial data for a stock ticker.", parameters: { type: "OBJECT", properties: { ticker: { type: "STRING" }, start_date: { type: "STRING" }, end_date: { type: "STRING" } }, required: ["ticker"] } },
+                { name: "fetch_news", description: "Get news articles.", parameters: { type: "OBJECT", properties: { q: { type: "STRING" }, category: { type: "STRING" }, region: { type: "STRING" }, from_date: { type: "STRING" }, to_date: { type: "STRING" }, start: { type: "NUMBER" }}}}
             ];
 
             // --- UI & Settings ---
@@ -484,48 +306,31 @@
             clearHistoryBtn.addEventListener('click', () => {
                 chatHistory = [];
                 chatMessages.innerHTML = '';
-                saveChatHistory();
+                localStorage.removeItem('stellar-chat-history');
                 addMessage('system', 'Chat history cleared.');
                 settingsModal.classList.add('hidden');
             });
 
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                const recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.lang = 'en-US';
-                recognition.interimResults = false;
-                micButton.addEventListener('click', () => {
-                    micButton.classList.add('text-red-500');
-                    recognition.start();
-                });
-                recognition.onresult = (event) => {
-                    chatInput.value = event.results[0][0].transcript;
-                    handleSendMessage();
-                };
-                recognition.onend = () => micButton.classList.remove('text-red-500');
-                recognition.onerror = (event) => addMessage('system', `Speech recognition error: ${event.error}`);
-            } else {
-                micButton.disabled = true;
-                micButton.title = "Speech recognition not supported.";
+            const saveChatHistory = () => {
+                const historyData = { timestamp: Date.now(), history: chatHistory };
+                localStorage.setItem('stellar-chat-history', JSON.stringify(historyData));
             }
 
-            const saveChatHistory = () => localStorage.setItem('stellar-chat-history', JSON.stringify(chatHistory));
             const loadChatHistory = () => {
-                const savedHistory = localStorage.getItem('stellar-chat-history');
-                if (savedHistory) {
-                    chatHistory = JSON.parse(savedHistory);
+                const savedData = localStorage.getItem('stellar-chat-history');
+                if (savedData) {
+                    const { timestamp, history } = JSON.parse(savedData);
+                    const oneDay = 24 * 60 * 60 * 1000;
+                    if (Date.now() - timestamp > oneDay) {
+                        localStorage.removeItem('stellar-chat-history');
+                        return;
+                    }
+                    chatHistory = history;
                     chatMessages.innerHTML = '';
-                    chatHistory.forEach(entry => {
-                        // Ensure the history entry has the expected structure before rendering
-                        if (entry.role && entry.parts && entry.parts[0] && entry.parts[0].text) {
-                            if (entry.role === 'user') {
-                                addMessage('user', entry.parts[0].text);
-                            } else if (entry.role === 'model') {
-                                addMessage('stellar', simpleMarkdownToHtml(entry.parts[0].text), true);
-                            }
+                    chatHistory.forEach(item => {
+                        if (item.sender && item.id) {
+                           addMessage(item.sender, item.message, item.isRawHtml, item.id);
                         }
-                        // Silently ignore tool call/response parts in the history display
                     });
                 }
             };
@@ -534,7 +339,7 @@
                 const savedTheme = localStorage.getItem('stellar-theme') || 'light';
                 applyTheme(savedTheme);
                 loadChatHistory();
-                if (chatHistory.length === 0) {
+                if (chatMessages.children.length === 0) {
                     addMessage('stellar', 'Hello, I am Stellar. How can I assist you today?');
                 }
                 appContainer.classList.add('fade-in');
@@ -545,5 +350,4 @@
         });
     </script>
 </body>
-
 </html>
