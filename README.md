@@ -163,7 +163,6 @@ GET /search/
 - `description` - Meta description or snippet
 - `source` - Domain source
 - `rank` - Search result position
-- `date` - Last modified date (when available)
 
 ### Language Codes
 | Code | Language | Code | Language | Code | Language |
@@ -294,7 +293,6 @@ curl "https://swipeapis.vercel.app/news/?region=DE&language=de&category=business
       "url": "https://example.com/ai-healthcare",
       "source": "Tech News Daily",
       "published_at": "2025-08-24T14:30:00Z",
-      "author": "Dr. Sarah Johnson",
       "category": "technology",
       "region": "US",
       "language": "en",

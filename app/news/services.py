@@ -61,23 +61,31 @@ def get_news_service(
         gn = GoogleNews(lang=language.lower(), country=region.upper())
         search_result = None
 
-        # Logic to switch between a targeted search and fetching top news.
-        if q:
-            full_query = q
-            if category:
-                full_query += f" when:{category}"
+        # Determine if we need to use the search endpoint. Any filter requires it.
+        use_search = q or valid_from or valid_to or category
+
+        if use_search:
+            # If a date filter is applied without a query, we need a default query.
+            # We can use the category if provided, otherwise a generic "news" term.
+            search_query = q or category or "top stories"
+
+            # If both q and category are present, combine them.
+            if q and category:
+                search_query = f"{q} {category}"
+
             try:
-                search_result = gn.search(full_query, from_=valid_from, to_=valid_to)
+                search_result = gn.search(search_query, from_=valid_from, to_=valid_to)
             except Exception as e:
                 raise NewsFetchingError(f"The underlying news library failed on search: {e}")
         else:
+            # Only fetch top news if no filters are applied.
             try:
                 search_result = gn.top_news()
             except Exception as e:
                 raise NewsFetchingError(f"The underlying news library failed on top_news: {e}")
 
         if not search_result:
-             raise NewsFetchingError("News service did not return a result.")
+            raise NewsFetchingError("News service did not return a result.")
 
         entries = search_result.get('entries', [])
 
