@@ -419,35 +419,41 @@ Your main goal is to decide which tool to use based on the user's request.
                     const candidate = result.candidates?.[0];
 
                     if (!candidate || !candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
-                        throw new Error("Invalid response from API - no content received");
+                        // If the model stops, it may not have any parts, but we might have a finishReason.
+                        if (candidate && candidate.finishReason && candidate.finishReason !== "STOP") {
+                             throw new Error(`API response stopped for reason: ${candidate.finishReason}`);
+                        }
+                        // It's possible to get no parts if the model has nothing to say.
+                        return "I'm not sure how to respond to that.";
                     }
 
-                    const part = candidate.content.parts[0];
+                    const parts = candidate.content.parts;
+                    const functionCallPart = parts.find(p => p.functionCall);
+                    const textParts = parts.filter(p => p.text).map(p => p.text).join("");
 
-                    if (part.functionCall) {
-                        const functionCall = part.functionCall;
+                    if (functionCallPart) {
+                        const functionCall = functionCallPart.functionCall;
                         const functionName = functionCall.name;
                         const functionArgs = functionCall.args || {};
 
-                        showTypingIndicator(`Using the ${functionName} tool...`);
+                        // Display conversational text if available, otherwise show a generic tool message.
+                        if (textParts) {
+                            showTypingIndicator(textParts);
+                        } else {
+                            showTypingIndicator(`Using the ${functionName} tool...`);
+                        }
 
                         if (availableTools[functionName]) {
                             try {
                                 const toolResult = await availableTools[functionName](functionArgs);
 
-                                // Add function call to history
-                                chatHistory.push({
-                                    role: 'model',
-                                    parts: [{ functionCall }]
-                                });
-
-                                // Add function response to history
+                                chatHistory.push({ role: 'model', parts: candidate.content.parts });
                                 chatHistory.push({
                                     role: 'function',
                                     parts: [{ functionResponse: { name: functionName, response: toolResult } }]
                                 });
 
-                                // Recursively call to get the final text response from the model
+                                // Recursively call to get the final text response
                                 return await getStellarResponse();
 
                             } catch (error) {
@@ -457,11 +463,12 @@ Your main goal is to decide which tool to use based on the user's request.
                         } else {
                             throw new Error(`Unknown tool requested: ${functionName}`);
                         }
-                    } else if (part.text) {
-                        return part.text;
+                    } else if (textParts) {
+                        // If there's only text, return it
+                        return textParts;
                     }
 
-                    throw new Error("Unable to process the response from the API");
+                    throw new Error("Unable to process the response from the API. No text or function call found.");
 
                 } catch (error) {
                     console.error("API Error Details:", error);
