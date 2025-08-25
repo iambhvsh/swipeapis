@@ -40,6 +40,8 @@ def get_finance_data_service(
     ticker: str,
     fields: Optional[str],
     history_days: int,
+    start_date: Optional[str],
+    end_date: Optional[str],
     interval: str,
     include_recommendations: bool,
     adjusted: bool
@@ -82,13 +84,34 @@ def get_finance_data_service(
         else:
             response_data[field] = None
 
-    # Separately fetch historical data if requested
-    if history_days > 0:
+    # --- FIX: Ensure previous_close is available for change calculation ---
+    # If yfinance .info doesn't provide previousClose, fetch it from history
+    if "previous_close" in requested_fields and response_data.get("previous_close") is None:
         try:
-            hist_df = stock.history(
-                period=f"{history_days}d", interval=interval,
-                auto_adjust=adjusted
-            )
+            hist = stock.history(period="2d")
+            if not hist.empty and len(hist) > 1:
+                # The second to last entry is the previous day's close
+                response_data["previous_close"] = hist['Close'].iloc[-2]
+        except Exception:
+            # If this fails, we still have None, which is handled by the frontend
+            pass
+    # --- END FIX ---
+
+    # Separately fetch historical data if requested
+    if history_days > 0 or start_date:
+        try:
+            # Prioritize start/end date over history_days
+            if start_date:
+                hist_df = stock.history(
+                    start=start_date, end=end_date,
+                    interval=interval, auto_adjust=adjusted
+                )
+            else:
+                hist_df = stock.history(
+                    period=f"{history_days}d", interval=interval,
+                    auto_adjust=adjusted
+                )
+
             if not hist_df.empty:
                 hist_df = hist_df.reset_index()
                 # Find the date column, which can have different names

@@ -16,7 +16,13 @@ async def get_finance_data(
                     "Check the main API documentation for available fields."
     ),
     history_days: int = Query(
-        0, ge=0, description="The number of days of historical price data to fetch."
+        0, ge=0, description="The number of days of historical price data to fetch. Deprecated if start_date is used."
+    ),
+    start_date: Optional[str] = Query(
+        None, description="The start date for historical data (YYYY-MM-DD)."
+    ),
+    end_date: Optional[str] = Query(
+        None, description="The end date for historical data (YYYY-MM-DD)."
     ),
     interval: str = Query(
         "1d",
@@ -40,6 +46,8 @@ async def get_finance_data(
             ticker=ticker,
             fields=fields,
             history_days=history_days,
+            start_date=start_date,
+            end_date=end_date,
             interval=interval,
             include_recommendations=include_recommendations,
             adjusted=adjusted
