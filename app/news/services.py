@@ -48,7 +48,7 @@ def get_news_service(
     region: str,
     category: Optional[str],
     include_sentiment: bool
-) -> List[Dict[str, Any]]:
+) -> Dict[str, Any]:
     """
     Main service to fetch news. It uses pygooglenews to either search for
     a specific query or get the top headlines.
@@ -76,7 +76,7 @@ def get_news_service(
 
         entries = search_result.get('entries', [])
 
-        response_list = []
+        article_list = []
         for entry in entries[:num_results]:
             description = clean_html(entry.get('summary', ''))
             article = {
@@ -91,9 +91,9 @@ def get_news_service(
             if include_sentiment:
                 sentiment_text = f"{article['title']}. {description}"
                 article['sentiment'] = sia.polarity_scores(sentiment_text)
-            response_list.append(article)
+            article_list.append(article)
 
-        return response_list
+        return {"articles": article_list}
 
     except Exception as e:
         raise NewsFetchingError(f"Error fetching news results: {e}")

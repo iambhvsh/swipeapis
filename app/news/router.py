@@ -6,7 +6,7 @@ from .services import get_news_service, InvalidDateFormatError, \
 router = APIRouter()
 
 
-@router.get("/", response_model=List[Dict[str, Any]])
+@router.get("/", response_model=Dict[str, Any])
 async def get_news(
     q: Optional[str] = Query(
         None,
