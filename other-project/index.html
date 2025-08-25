@@ -4,12 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellar – AI Assistant (Upgraded)</title>
+    <title>Stellar – AI Assistant</title>
 
-    <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -20,21 +17,14 @@
             --bg-dark: #000000;
             --text-light: #000000;
             --text-dark: #ffffff;
-            --panel-light: #ffffff;
             --panel-dark: #111111;
             --border-light: #eaeaea;
             --border-dark: #333333;
             --accent: #0070f3;
             --geist-gray: #666666;
-            --geist-light-gray: #888888;
         }
 
-        html,
-        body {
-            height: 100%;
-            overflow: hidden;
-        }
-
+        html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             transition: background-color 0.2s, color 0.2s;
@@ -42,189 +32,94 @@
             flex-direction: column;
         }
 
-        .light-theme {
-            background-color: var(--bg-light);
-            color: var(--text-light);
-        }
-
-        .dark-theme {
-            background-color: var(--bg-dark);
-            color: var(--text-dark);
-        }
+        .light-theme { background-color: var(--bg-light); color: var(--text-light); }
+        .dark-theme { background-color: var(--bg-dark); color: var(--text-dark); }
 
         .panel {
             transition: background-color 0.2s;
             border-color: var(--border-light);
         }
-        .dark-theme .panel {
-            border-color: var(--border-dark);
-        }
-
-        .light-theme .panel { background-color: var(--panel-light); }
+        .dark-theme .panel { border-color: var(--border-dark); }
+        .light-theme .panel { background-color: var(--bg-light); }
         .dark-theme .panel { background-color: var(--panel-dark); }
 
-        .chat-bubble {
-            max-width: 90%;
-            padding: 10px 16px;
-            border-radius: 8px;
-            word-wrap: break-word;
-            line-height: 1.6;
-        }
+        .chat-bubble { max-width: 90%; padding: 10px 16px; border-radius: 12px; word-wrap: break-word; line-height: 1.6; }
+        .user-bubble { background-color: var(--accent); color: white; }
+        .stellar-bubble { background-color: transparent; padding: 0; }
+        .stellar-bubble a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+        .stellar-bubble a:hover { background-color: var(--accent); color: white; }
+        .stellar-bubble ul { list-style-position: inside; padding-left: 8px; }
+        .stellar-bubble h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
 
-        .user-bubble {
-            background-color: var(--accent);
-            color: white;
-        }
+        .toolbar-icon { cursor: pointer; transition: color 0.2s ease; color: var(--geist-gray); }
+        .toolbar-icon:hover { color: var(--accent); }
 
-        .stellar-bubble {
-            background-color: transparent;
-            padding: 0;
-        }
-
-        .stellar-bubble a {
-            color: var(--accent);
-            text-decoration: none;
-            border-bottom: 1px solid var(--accent);
-        }
-        .stellar-bubble a:hover {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .stellar-bubble ul {
-            list-style-position: inside;
-            padding-left: 8px;
-        }
-        .stellar-bubble h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .toolbar-icon {
-            cursor: pointer;
-            transition: color 0.2s ease;
-            color: var(--geist-gray);
-        }
-
-        .toolbar-icon:hover {
-            color: var(--accent);
-        }
-
-        .input-field {
-            background: transparent;
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 8px;
             border: 1px solid var(--border-light);
-            border-radius: 8px;
-            outline: none;
-            width: 100%;
-            padding: 12px 18px;
-            font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+            background-color: var(--bg-light);
         }
-        .dark-theme .input-field {
+        .dark-theme .input-container {
             border-color: var(--border-dark);
+            background-color: var(--bg-dark);
         }
-        .input-field:focus {
+        .input-container:focus-within {
             border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
         }
 
-
-        #send-button {
-            background-color: var(--accent);
-            color: white;
-            border-radius: 8px;
-            padding: 10px;
-            transition: background-color 0.2s;
-        }
-        #send-button:hover {
-            background-color: #0056b3;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
+        .input-field {
+            flex-grow: 1;
             background: transparent;
+            border: none;
+            outline: none;
+            padding: 8px 48px 8px 40px; /* Padding for icons */
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            overflow-y: hidden; /* Hide scrollbar, handled by JS */
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--geist-gray);
         }
-        .dark-theme ::-webkit-scrollbar-thumb {
-            background: #444;
-        }
+        .input-icon.mic { left: 16px; }
+        .input-icon.send { right: 16px; background-color: var(--accent); color: white; border-radius: 8px; padding: 6px; cursor: pointer; }
+        .input-icon.send:hover { background-color: #0056b3; }
 
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
 
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .dark-theme ::-webkit-scrollbar-thumb { background: #444; }
+
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 26px;
-        }
-
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked+.slider { background-color: var(--accent); }
+        input:checked+.slider:before { transform: translateX(20px); }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .3s;
-            border-radius: 26px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: var(--accent);
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(20px);
-        }
-
-        .data-card {
-            margin-top: 12px;
-            padding: 16px;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-        }
-        .dark-theme .data-card {
-            border-color: var(--border-dark);
-        }
-
-        .news-article {
-            margin-top: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-light);
-        }
-        .dark-theme .news-article {
-            border-color: var(--border-dark);
-        }
+        .data-card { margin-top: 12px; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; }
+        .dark-theme .data-card { border-color: var(--border-dark); }
+        .news-article { margin-top: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+        .dark-theme .news-article { border-color: var(--border-dark); }
         .news-article:last-child { border-bottom: none; }
     </style>
 </head>
@@ -232,26 +127,25 @@
 <body class="light-theme">
 
     <div id="app-container" class="w-full h-full flex flex-col opacity-0">
-        <header class="text-center p-4 border-b panel">
+        <header class="flex justify-between items-center text-center p-4 border-b panel">
+            <div class="w-10"></div> <!-- Spacer -->
             <h1 class="text-xl font-semibold tracking-tight">Stellar</h1>
+            <div id="settings-btn" class="toolbar-icon w-10" title="Settings"><i class="material-icons">settings</i></div>
         </header>
         <main class="flex-grow flex flex-col overflow-hidden">
             <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4"></div>
         </main>
         <footer class="p-2 sm:p-4 border-t panel">
-            <div class="flex items-center space-x-2">
-                <div id="settings-btn" class="toolbar-icon" title="Settings"><i class="material-icons">settings</i></div>
-                <div class="input-field-container flex-grow flex items-center rounded-full">
-                    <input type="text" id="chat-input" class="input-field" placeholder="Ask Stellar anything...">
-                    <button id="mic-button" class="toolbar-icon mr-1"><i class="material-icons">mic</i></button>
-                </div>
-                <button id="send-button" class="toolbar-icon text-white bg-blue-500 rounded-full !p-3"><i class="material-icons">arrow_upward</i></button>
+            <div class="input-container">
+                <div class="input-icon mic"><i class="material-icons">mic</i></div>
+                <textarea id="chat-input" class="input-field" placeholder="Ask Stellar anything..." rows="1"></textarea>
+                <div id="send-button" class="input-icon send"><i class="material-icons">arrow_upward</i></div>
             </div>
         </footer>
     </div>
 
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="panel p-6 rounded-2xl w-full max-w-md">
+        <div class="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 p-6 rounded-2xl w-full max-w-md">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold">Settings</h2>
                 <button id="close-settings" class="toolbar-icon"><i class="material-icons">close</i></button>
@@ -273,7 +167,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURATION ---
             const CONFIG = {
-                API_KEY: "AIzaSyCgX5yszHAZyBe9_S9GLw-JKXWSaUBqFsY", // <-- PASTE YOUR GOOGLE GEMINI KEY HERE
+                API_KEY: "AIzaSyCgX5yszHAZyBe9_S9GLw-JKXWSaUBqFsY",
                 PROXY_URL: 'https://blkproxy.vercel.app/api/proxy?url=',
                 API_BASE_URL: 'https://swipeapis.vercel.app',
                 MODEL_NAME: 'gemini-1.5-pro-latest'
@@ -283,7 +177,7 @@
             const chatMessages = document.getElementById('chat-messages');
             const chatInput = document.getElementById('chat-input');
             const sendButton = document.getElementById('send-button');
-            const micButton = document.getElementById('mic-button');
+            const micButton = document.querySelector('.input-icon.mic');
             const settingsBtn = document.getElementById('settings-btn');
             const settingsModal = document.getElementById('settings-modal');
             const closeSettingsBtn = document.getElementById('close-settings');
@@ -292,7 +186,14 @@
             const appContainer = document.getElementById('app-container');
 
             let chatHistory = [];
-            let lastNewsQuery = null; // State for news pagination
+            let lastNewsQuery = null;
+
+            // --- AUTO-RESIZING TEXTAREA ---
+            const adjustTextareaHeight = () => {
+                chatInput.style.height = 'auto';
+                chatInput.style.height = (chatInput.scrollHeight) + 'px';
+            };
+            chatInput.addEventListener('input', adjustTextareaHeight);
 
             // --- Message Handling ---
             const addMessage = (sender, message, isRawHtml = false) => {
@@ -336,10 +237,10 @@
             };
 
             const showTypingIndicator = (message = null) => {
-                hideTypingIndicator(); // Remove any existing indicator
+                hideTypingIndicator();
                 const typingElement = document.createElement('div');
                 typingElement.id = 'typing-indicator';
-                typingElement.className = 'w-full flex justify-start fade-in';
+                typingElement.className = 'w-full flex justify-start fade-in pl-4';
                 const content = message
                     ? `<p class="text-sm text-gray-500 dark:text-gray-400">${message}</p>`
                     : `<div class="chat-bubble stellar-bubble flex items-center space-x-1"><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span></div>`;
@@ -365,6 +266,7 @@
                 if (userInput === '') return;
                 addMessage('user', userInput);
                 chatInput.value = '';
+                adjustTextareaHeight();
                 showTypingIndicator();
                 try {
                     const stellarResponse = await getStellarResponse(userInput);
@@ -424,23 +326,22 @@
 
             const handleSearchAndRespond = async (content, originalUserInput) => {
                 const { query } = content;
-                showTypingIndicator(`Searching for "${query}"...`);
+                const messageId = addMessage('stellar', `Searching for "${query}"...`);
                 try {
                     const searchResults = await googleSearchAPI(query);
                     if (!searchResults.results || searchResults.results.length === 0) {
-                        hideTypingIndicator();
-                        addMessage('stellar', `I couldn't find any results for "${query}".`);
+                        updateMessage(messageId, `I couldn't find any results for "${query}".`);
                         return;
                     }
 
-                    showTypingIndicator('Analyzing search results...');
+                    updateMessage(messageId, 'Analyzing search results...');
                     let searchDataForAI = "Here are the top Google search results. Please synthesize this information to provide a comprehensive answer to the user's original query. Respond in clear, well-formatted HTML if necessary.\n\n";
                     searchResults.results.forEach(res => {
                         searchDataForAI += `Title: ${res.title}\nURL: ${res.url}\nDescription: ${res.description}\n\n`;
                     });
-                    showTypingIndicator();
+
                     const finalResponse = await getStellarResponse(originalUserInput, searchDataForAI);
-                    hideTypingIndicator();
+
                     if (finalResponse?.parts?.[0]?.text) {
                         let cleanText = finalResponse.parts[0].text.trim()
                         if (cleanText.startsWith('```json')) {
@@ -466,15 +367,12 @@
             // --- API Calls & Data Handling ---
             const getStellarResponse = async (prompt, extraContext = null) => {
                 const apiKey = CONFIG.API_KEY;
-
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL_NAME}:generateContent?key=${apiKey}`;
-
                 if (apiKey === "YOUR_API_KEY" || !apiKey) {
                     addMessage('system', 'CRITICAL ERROR: Google Gemini API Key is not set. Please add your key to the script.');
                     throw new Error('API Key not set.');
                 }
-
-                 const systemPrompt = `You are Stellar, a friendly and brilliant personal AI assistant.
+                const systemPrompt = `You are Stellar, a friendly and brilliant personal AI assistant.
 
                 ## Your Persona
                 - Your personality is helpful, friendly, and curious. You're like a super-smart friend.
@@ -518,31 +416,16 @@
 
                 Current Date: ${new Date().toLocaleDateString()}`;
 
-
-                const historyForAPI = chatHistory.slice(-6).map(m => ({
-                    role: m.sender === 'user' ? 'user' : 'model',
-                    parts: [{ text: m.message }]
-                }));
-
+                const historyForAPI = chatHistory.slice(-6).map(m => ({ role: m.sender === 'user' ? 'user' : 'model', parts: [{ text: m.message }] }));
                 const currentPrompt = extraContext ? `CONTEXT:\n${extraContext}\n\nBased on the context, answer this user request: "${prompt}"` : prompt;
-
-                const requestBody = {
-                    contents: [...historyForAPI, { role: 'user', parts: [{ text: currentPrompt }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] }
-                };
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
+                const requestBody = { contents: [...historyForAPI, { role: 'user', parts: [{ text: currentPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
 
                 if (!response.ok) {
                     const errorBody = await response.json();
                     console.error("API Error Response:", errorBody);
                     throw new Error(`API request failed: ${errorBody.error.message}`);
                 }
-
                 const result = await response.json();
                 if (result.candidates && result.candidates.length > 0) {
                     return result.candidates[0].content;
@@ -559,62 +442,45 @@
                 const finalUrl = CONFIG.PROXY_URL + encodeURIComponent(`${CONFIG.API_BASE_URL}${endpoint}`);
                 try {
                     const response = await fetch(finalUrl);
-                    const data = await response.json(); // Always try to parse JSON
+                    const data = await response.json();
                     if (!response.ok) {
-                        // Use the error message from the backend if available, otherwise use a generic message
                         const errorMessage = data.detail || `API request failed with status: ${response.status}`;
                         throw new Error(errorMessage);
                     }
-                    if (data.error) { // Handle application-level errors returned by the API
+                    if (data.error) {
                         throw new Error(data.error.message || 'An unknown API error occurred');
                     }
                     return data;
                 } catch (error) {
-                    // Catch fetch errors (network issues) or JSON parsing errors
                     console.error(`Error fetching from ${endpoint}:`, error);
-                    // Re-throw the error so the calling function can handle it
                     throw error;
                 }
             };
 
-            // --- API-specific functions ---
             const buildQueryString = (params) => new URLSearchParams(params).toString();
             const googleSearchAPI = (query, params = {}) => fetchViaProxy(`/search/?q=${encodeURIComponent(query)}&${buildQueryString(params)}`);
             const fetchStockAPI = (ticker, params = {}) => fetchViaProxy(`/finance/${ticker.toUpperCase()}?${buildQueryString(params)}`);
             const fetchNewsAPI = (params = {}) => fetchViaProxy(`/news/?${buildQueryString(params)}`);
 
-            // --- UI Formatting ---
             const formatHistoricalStockDataAsHtml = (data) => {
                 const formatNumber = (num, options = {}) => {
                     if (num == null || isNaN(num)) return 'N/A';
                     return new Intl.NumberFormat('en-US', options).format(num);
                 }
-                return `
-                <div class="data-card">
-                    <strong>${new Date(data.date).toLocaleDateString()}</strong>
-                    <div>Open: ${formatNumber(data.Open, { style: 'currency', currency: 'USD' })}</div>
-                    <div>High: ${formatNumber(data.High, { style: 'currency', currency: 'USD' })}</div>
-                    <div>Low: ${formatNumber(data.Low, { style: 'currency', currency: 'USD' })}</div>
-                    <div>Close: ${formatNumber(data.Close, { style: 'currency', currency: 'USD' })}</div>
-                    <div>Volume: ${formatNumber(data.Volume)}</div>
-                </div>`;
+                return `<div class="data-card"><strong>${new Date(data.date).toLocaleDateString()}</strong><div>Open: ${formatNumber(data.Open, { style: 'currency', currency: 'USD' })}</div><div>High: ${formatNumber(data.High, { style: 'currency', currency: 'USD' })}</div><div>Low: ${formatNumber(data.Low, { style: 'currency', currency: 'USD' })}</div><div>Close: ${formatNumber(data.Close, { style: 'currency', currency: 'USD' })}</div><div>Volume: ${formatNumber(data.Volume)}</div></div>`;
             };
 
             const formatStockDataAsHtml = (data) => {
-                // Helper to safely format numbers, returning 'N/A' if data is invalid
                 const formatNumber = (num, options = {}) => {
                     if (num == null || isNaN(num)) return 'N/A';
                     return new Intl.NumberFormat('en-US', options).format(num);
                 }
-
                 const price = parseFloat(data.price);
                 const prevClose = parseFloat(data.previous_close);
                 const change = (price != null && prevClose != null) ? price - prevClose : null;
                 const changePercent = (change != null && prevClose != null && prevClose !== 0) ? (change / prevClose) * 100 : null;
-
                 const changeColor = change >= 0 ? 'text-green-500' : 'text-red-500';
                 const changeSign = change >= 0 ? '+' : '';
-
                 let recommendationsHtml = '';
                 if (data.recommendations && data.recommendations.length > 0) {
                     recommendationsHtml = '<strong>Analyst Ratings:</strong><ul>';
@@ -623,17 +489,7 @@
                     });
                     recommendationsHtml += '</ul>';
                 }
-
-                return `
-                <div class="data-card">
-                    <strong>${data.ticker}</strong>
-                    <div>Price: ${formatNumber(price, { style: 'currency', currency: 'USD' })}</div>
-                    <div class="${changeColor}">Change: ${changeSign}${formatNumber(change, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${changeSign}${formatNumber(changePercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)</div>
-                    <div>P/E Ratio: ${formatNumber(data.pe_ratio, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    <div>52-Week High: ${formatNumber(data['52_week_high'], { style: 'currency', currency: 'USD' })}</div>
-                    <div>52-Week Low: ${formatNumber(data['52_week_low'], { style: 'currency', currency: 'USD' })}</div>
-                    ${recommendationsHtml}
-                </div>`;
+                return `<div class="data-card"><strong>${data.ticker}</strong><div>Price: ${formatNumber(price, { style: 'currency', currency: 'USD' })}</div><div class="${changeColor}">Change: ${changeSign}${formatNumber(change, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${changeSign}${formatNumber(changePercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)</div><div>P/E Ratio: ${formatNumber(data.pe_ratio, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div><div>52-Week High: ${formatNumber(data['52_week_high'], { style: 'currency', currency: 'USD' })}</div><div>52-Week Low: ${formatNumber(data['52_week_low'], { style: 'currency', currency: 'USD' })}</div>${recommendationsHtml}</div>`;
             };
 
             const formatNewsDataAsHtml = (data) => {
@@ -641,41 +497,28 @@
                 if (!data.articles || data.articles.length === 0) {
                     return '<p>No articles found for this query.</p>';
                 }
-                // Show 10 articles by default
                 data.articles.slice(0, 10).forEach(article => {
                     let sentimentHtml = '';
-                    if (article.sentiment && article.sentiment.compound) { // VADER gives a compound score
+                    if (article.sentiment && article.sentiment.compound) {
                         const sentimentScore = article.sentiment.compound;
                         let sentimentLabel = 'neutral';
                         let sentimentColor = 'text-gray-500';
-                        if (sentimentScore > 0.05) {
-                            sentimentLabel = 'positive';
-                            sentimentColor = 'text-green-500';
-                        } else if (sentimentScore < -0.05) {
-                            sentimentLabel = 'negative';
-                            sentimentColor = 'text-red-500';
-                        }
+                        if (sentimentScore > 0.05) { sentimentLabel = 'positive'; sentimentColor = 'text-green-500'; }
+                        else if (sentimentScore < -0.05) { sentimentLabel = 'negative'; sentimentColor = 'text-red-500'; }
                         sentimentHtml = `<span class="text-xs ${sentimentColor}">(${sentimentLabel})</span>`;
                     }
-                    articlesHtml += `
-                    <div class="news-article">
-                        <strong><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></strong> ${sentimentHtml}
-                        <p class="text-xs">${article.source} - ${new Date(article.published).toLocaleDateString()}</p>
-                        <p class="text-sm mt-1">${article.description}</p>
-                    </div>`;
+                    articlesHtml += `<div class="news-article"><strong><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></strong> ${sentimentHtml}<p class="text-xs">${article.source} - ${new Date(article.published).toLocaleDateString()}</p><p class="text-sm mt-1">${article.description}</p></div>`;
                 });
                 articlesHtml += '</div>';
                 return articlesHtml;
             };
 
-            // --- High-Level Fetch & Display Functions ---
             const fetchAndDisplayStock = async (content) => {
                 const { ticker, params, commentary } = content;
                 showTypingIndicator(commentary);
                 try {
                     const data = await fetchStockAPI(ticker, params);
                     hideTypingIndicator();
-
                     if (params.start_date) {
                         if (data.historical && data.historical.length > 0) {
                             const stockHtml = formatHistoricalStockDataAsHtml(data.historical[0]);
@@ -700,7 +543,7 @@
 
              const fetchAndDisplayNews = async (content) => {
                 const { params, commentary } = content;
-                lastNewsQuery = params; // Store for pagination
+                lastNewsQuery = params;
                 showTypingIndicator(commentary);
                 try {
                     const data = await fetchNewsAPI(params);
@@ -725,27 +568,22 @@
                         const change = data.price - data.previous_close;
                         dataForAI += `${data.ticker}: Price=${data.price.toFixed(2)}, Change=${change.toFixed(2)}, P/E=${data.pe_ratio?.toFixed(2) || 'N/A'}\n`;
                     });
-                    showTypingIndicator();
                     const aiComparisonResponse = await getStellarResponse("Compare these stocks", dataForAI);
                     hideTypingIndicator();
                     if (aiComparisonResponse?.parts?.[0]?.text) {
                         let cleanText = aiComparisonResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
                         const parsedJson = JSON.parse(cleanText);
                         let finalHtml = `<p>${parsedJson.content}</p>`;
-                        results.forEach(data => {
-                            finalHtml += formatStockDataAsHtml(data);
-                        });
-                        updateMessage(messageId, finalHtml, true);
-                    } else {
-                        throw new Error("Failed to get comparison from AI.");
-                    }
+                        results.forEach(data => { finalHtml += formatStockDataAsHtml(data); });
+                        addMessage('stellar', finalHtml, true);
+                    } else { throw new Error("Failed to get comparison from AI."); }
                 } catch (error) {
+                    hideTypingIndicator();
                     console.error("Stock comparison fetch error:", error);
-                    updateMessage(messageId, `I couldn't retrieve all data for comparison. Please check the tickers.`);
+                    addMessage('stellar', `I couldn't retrieve all data for comparison. Please check the tickers.`);
                 }
             };
 
-            // --- UI & Settings ---
             const applyTheme = (theme) => {
                 document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme';
                 darkModeToggle.checked = theme === 'dark';
@@ -769,7 +607,6 @@
                 settingsModal.classList.add('hidden');
             });
 
-            // --- Speech Recognition ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 const recognition = new SpeechRecognition();
@@ -791,7 +628,6 @@
                 micButton.title = "Speech recognition not supported.";
             }
 
-            // --- Local Storage ---
             const saveChatHistory = () => localStorage.setItem('stellar-chat-history', JSON.stringify(chatHistory));
             const loadChatHistory = () => {
                 const savedHistory = localStorage.getItem('stellar-chat-history');
@@ -802,7 +638,6 @@
                 }
             };
 
-            // --- Initialization ---
             const init = () => {
                 const savedTheme = localStorage.getItem('stellar-theme') || 'light';
                 applyTheme(savedTheme);
