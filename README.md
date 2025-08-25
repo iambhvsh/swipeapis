@@ -51,7 +51,9 @@ GET /finance/{ticker}
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `fields` | string | All fields | Comma-separated list of specific fields to return |
-| `history_days` | integer | `0` | Number of days of historical data (0-365) |
+| `history_days` | integer | `0` | Number of days of historical data. Deprecated if `start_date` is used. |
+| `start_date` | string | - | Start date for historical data (YYYY-MM-DD). Overrides `history_days`. |
+| `end_date` | string | - | End date for historical data (YYYY-MM-DD). Defaults to today. |
 | `interval` | string | `1d` | Data interval: `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1wk`, `1mo` |
 | `include_recommendations` | boolean | `false` | Include analyst recommendations and price targets |
 | `adjusted` | boolean | `true` | Return dividend/split adjusted prices |
@@ -88,6 +90,11 @@ curl "https://swipeapis.vercel.app/finance/TSLA?fields=price,market_cap,volume&h
 **With analyst recommendations:**
 ```bash
 curl "https://swipeapis.vercel.app/finance/MSFT?include_recommendations=true"
+```
+
+**With a specific date range:**
+```bash
+curl "https://swipeapis.vercel.app/finance/NVDA?start_date=2024-08-01&end_date=2024-08-20"
 ```
 
 ### Response Example
