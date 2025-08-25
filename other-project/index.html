@@ -217,8 +217,14 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 if (sender !== 'system') {
-                    const messageForHistory = isRawHtml ? `[Stellar displayed a visual element]` : message;
-                    chatHistory.push({ sender, message: messageForHistory, id: messageId });
+                    // Save the raw message and the flag to render it as HTML correctly
+                    chatHistory.push({ sender, message, isRawHtml, id: messageId });
+
+                    // Enforce the 20-message limit
+                    if (chatHistory.length > 20) {
+                        chatHistory.shift(); // Remove the oldest message
+                    }
+
                     saveChatHistory();
                 }
                 return messageId;
@@ -646,7 +652,8 @@
                 if (savedHistory) {
                     chatHistory = JSON.parse(savedHistory);
                     chatMessages.innerHTML = '';
-                    chatHistory.forEach(item => addMessage(item.sender, item.message, true));
+                    // Use the saved isRawHtml flag to correctly re-render messages
+                    chatHistory.forEach(item => addMessage(item.sender, item.message, item.isRawHtml));
                 }
             };
 
