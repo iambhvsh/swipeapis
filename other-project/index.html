@@ -493,6 +493,9 @@
                 - **Contextual Awareness:** Pay close attention to the conversation history. If the user's request is a follow-up (e.g., "summarize this", "show me more", "what about last week?"), use the information from the previous turn as context.
                 - **Proactive Tool Use:** Be proactive. If a user's query is vague, use your tools to get the information you need.
                 - **HTML Formatting:** For any response that requires formatting (like lists, bolding), use appropriate HTML tags in the 'content' field.
+                - **Input Validation (Very Important!):**
+                    - **Ticker Symbols:** Before fetching stock data, validate the ticker. If it seems like a typo of a major company, correct it. Common examples: 'APPL' -> 'AAPL', 'GOOG' -> 'GOOGL', 'METS' -> 'META'.
+                    - **Dates:** You MUST validate dates before using a tool. The current date is ${new Date().toLocaleDateString()}. Any request for historical data for a date AFTER today is a request for a future date. You cannot see the future. If a user asks for a future date, you MUST respond with a polite \`{"type": "text", ...}\` message explaining that you cannot fetch data from the future. Do not attempt to call a tool with a future date.
 
                 ## Tool Delegation Strategy
                 Your main goal is to decide which tool to use based on the user's request.
@@ -593,6 +596,22 @@
             const fetchNewsAPI = (params = {}) => fetchViaProxy(`/news/?${buildQueryString(params)}`);
 
             // --- UI Formatting ---
+            const formatHistoricalStockDataAsHtml = (data) => {
+                const formatNumber = (num, options = {}) => {
+                    if (num == null || isNaN(num)) return 'N/A';
+                    return new Intl.NumberFormat('en-US', options).format(num);
+                }
+                return `
+                <div class="data-card">
+                    <strong>${new Date(data.date).toLocaleDateString()}</strong>
+                    <div>Open: ${formatNumber(data.Open, { style: 'currency', currency: 'USD' })}</div>
+                    <div>High: ${formatNumber(data.High, { style: 'currency', currency: 'USD' })}</div>
+                    <div>Low: ${formatNumber(data.Low, { style: 'currency', currency: 'USD' })}</div>
+                    <div>Close: ${formatNumber(data.Close, { style: 'currency', currency: 'USD' })}</div>
+                    <div>Volume: ${formatNumber(data.Volume)}</div>
+                </div>`;
+            };
+
             const formatStockDataAsHtml = (data) => {
                 // Helper to safely format numbers, returning 'N/A' if data is invalid
                 const formatNumber = (num, options = {}) => {
@@ -667,11 +686,28 @@
                 const messageId = addMessage('stellar', commentary);
                 try {
                     const data = await fetchStockAPI(ticker, params);
-                    const stockHtml = formatStockDataAsHtml(data);
-                    updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
+
+                    // If the user requested a specific date
+                    if (params.start_date) {
+                        if (data.historical && data.historical.length > 0) {
+                            // Use the new historical formatter for the first result
+                            const stockHtml = formatHistoricalStockDataAsHtml(data.historical[0]);
+                            updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
+                        } else {
+                            updateMessage(messageId, `I couldn't find any historical data for ${ticker} on that date. It might have been a holiday or a non-trading day.`);
+                        }
+                    } else {
+                        // Otherwise, use the default current-day formatter
+                        if (data.price == null) {
+                            updateMessage(messageId, `I'm sorry, but I couldn't retrieve valid financial data for "${ticker}". Please ensure the ticker symbol is correct and not delisted.`);
+                            return;
+                        }
+                        const stockHtml = formatStockDataAsHtml(data);
+                        updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
+                    }
                 } catch (error) {
                     console.error("Stock fetch error:", error);
-                    updateMessage(messageId, `I couldn't retrieve data for ${ticker}. The ticker might be incorrect or the API is unavailable.`);
+                    updateMessage(messageId, `I couldn't retrieve data for ${ticker}. The API might be temporarily unavailable or the ticker is incorrect.`);
                 }
             };
 
