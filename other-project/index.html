@@ -286,7 +286,7 @@
                 API_KEY: "AIzaSyCgX5yszHAZyBe9_S9GLw-JKXWSaUBqFsY", // <-- PASTE YOUR GOOGLE GEMINI KEY HERE
                 PROXY_URL: 'https://blkproxy.vercel.app/api/proxy?url=',
                 API_BASE_URL: 'https://swipeapis.vercel.app',
-                MODEL_NAME: 'gemini-1.5-pro-latest' // Using a more powerful model for better intelligence
+                MODEL_NAME: 'gemini-1.5-pro-latest'
             };
 
             // --- GET ALL HTML ELEMENTS ---
@@ -434,14 +434,13 @@
                 const messageId = addMessage('stellar', `Searching for: "${query}"...`);
                 try {
                     const searchResults = await googleSearchAPI(query);
-                    // The search API returns the list directly now.
-                    if (!searchResults || searchResults.length === 0) {
+                    if (!searchResults.results || searchResults.results.length === 0) {
                         updateMessage(messageId, `I couldn't find any results for "${query}".`);
                         return;
                     }
                     updateMessage(messageId, `Analyzing search results for: "${query}"...`);
                     let searchDataForAI = "Here are the top Google search results. Please synthesize this information to provide a comprehensive answer to the user's original query. Respond in clear, well-formatted HTML if necessary.\n\n";
-                    searchResults.forEach(res => {
+                    searchResults.results.forEach(res => {
                         searchDataForAI += `Title: ${res.title}\nURL: ${res.url}\nDescription: ${res.description}\n\n`;
                     });
                     showTypingIndicator();
@@ -452,7 +451,6 @@
                         if (cleanText.startsWith('```json')) {
                             cleanText = cleanText.replace(/^```json\s*|```$/g, '');
                         }
-                        // Add try-catch for the final response processing
                         try {
                             const parsedJson = JSON.parse(cleanText);
                             updateMessage(messageId, parsedJson.content, true);
