@@ -6,7 +6,7 @@ from .services import google_search_service, SearchError, EmptyQueryError, \
 router = APIRouter()
 
 
-@router.get("/", response_model=List[Dict[str, Any]])
+@router.get("/", response_model=Dict[str, Any])
 async def perform_search(
     q: str = Query(..., description="The search query string."),
     num_results: int = Query(
@@ -46,7 +46,7 @@ async def perform_search(
             include_rank=include_rank,
             fields=fields
         )
-        return results
+        return {"results": results}
     except EmptyQueryError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ValueError as e:
