@@ -22,7 +22,7 @@ FIELD_MAPPING = {
 }
 
 DEFAULT_FIELDS = [
-    "price", "market_cap", "pe_ratio", "52_week_high", "52_week_low"
+    "price", "previous_close", "market_cap", "pe_ratio", "52_week_high", "52_week_low"
 ]
 
 
