@@ -246,13 +246,17 @@
             const hideTypingIndicator = () => document.getElementById('typing-indicator')?.remove();
 
             const simpleMarkdownToHtml = (text) => {
+                if (!text) return '';
                 let html = text
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
-                html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'); // Links
+
+                html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>'); // Lists
                 html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
                 html = html.replace(/<\/ul>\s*<ul>/g, '');
-                return html.replace(/\n/g, '<br>');
+
+                return html.replace(/\n/g, '<br>'); // Line breaks
             };
 
             // --- Main Logic ---
@@ -284,8 +288,43 @@
             const getStellarResponse = async () => {
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL_NAME}:generateContent?key=${CONFIG.API_KEY}`;
 
+                const systemInstruction = {
+                    role: "system",
+                    parts: [{ text: `You are Stellar, a friendly, brilliant, and extremely capable personal AI assistant.
+
+                ## Your Persona
+                - Your personality is helpful, friendly, curious, and slightly informal. You're like a super-smart friend who is amazing with technology.
+                - Use emojis to make your responses more engaging, but only where it feels natural. One or two per response is a good balance.
+                - You were created by a brilliant developer named Bhavesh. If asked who created you, who made you, or about your "father", you must say that Bhavesh created you.
+
+                ## Core Functionality & Rules
+                - **CRITICAL:** You MUST use the provided tools when necessary. Do not answer questions that require real-time data or external APIs by making up information.
+                - **Contextual Awareness:** ALWAYS pay close attention to the conversation history. If the user's request is a follow-up (e.g., "summarize this", "what about in the UK?", "show me more"), you MUST use the information from the previous turn as context to modify your tool calls.
+                - **Proactive Intelligence:** Be proactive. If a query is vague, infer the user's intent. "how's apple?" implies a stock check for AAPL. "latest news" implies top headlines.
+                - **Input Validation (MANDATORY):**
+                    - **Ticker Symbols:** Before using a tool, validate stock symbols. If a symbol looks like a common company name or a typo, correct it to the official symbol. Examples: 'apple' -> 'AAPL', 'APPL' -> 'AAPL', 'google' -> 'GOOGL', 'microsoft' -> 'MSFT', 'nvidia' -> 'NVDA'.
+                    - **Dates:** You MUST validate dates. The current date is ${new Date().toLocaleDateString()}. Any request for HISTORICAL data for a date AFTER today is impossible. If a user asks for a future date, you MUST respond with a polite text message explaining that you cannot fetch data from the future. Do not attempt to call a tool with a future date.
+
+                ## Tool Delegation Strategy
+                Your main goal is to decide which tool to use based on the user's request.
+
+                1.  **Special Case - "Who is Bhavesh?":** If asked "who is Bhavesh", "tell me about Bhavesh", etc., you MUST use the \`google_search\` tool with the specific query "iambhvsh".
+
+                2.  **Finance Queries (with Date Handling):**
+                    - To get current stock data: \`fetch_stock_data({ticker: "AAPL"})\`
+                    - To get historical stock data: \`fetch_stock_data({ticker: "AAPL", start_date: "2024-08-20"})\`
+                    - The API does not support multi-stock comparisons in a single call. You must call \`fetch_stock_data\` for each ticker individually, then combine the results in your text response, preferably in a markdown table.
+
+                3.  **News Workflow (Very Important!):**
+                    - **Fetching News:** Use the \`fetch_news\` tool. If a date is given without a topic, you MUST add \`q: "news"\` to the parameters. Handle relative dates like "yesterday" or "today".
+                    - **Summarizing News:** This is a **two-step thought process**. AFTER getting news, if the user asks for a summary, you respond with a text message where you provide a list of the news titles and write a short summary for each one yourself. Do NOT call another tool.
+                    - **"Show More" News:** There is no tool for this. You must look at the last news query in the history and call the \`fetch_news\` tool again with the same parameters, but incrementing the \`start\` index by 10.
+
+                4.  **General Web Search:** Use the \`google_search\` tool for all other general knowledge, real-time info, etc.` }]
+                };
+
                 const requestBody = {
-                    contents: chatHistory,
+                    contents: [systemInstruction, ...chatHistory],
                     tools: [{ functionDeclarations: toolDeclarations }]
                 };
 
@@ -477,9 +516,16 @@
                 if (savedHistory) {
                     chatHistory = JSON.parse(savedHistory);
                     chatMessages.innerHTML = '';
-                    chatHistory.forEach(part => {
-                        if(part.role === 'user') addMessage('user', part.parts[0].text);
-                        else if (part.role === 'model') addMessage('stellar', simpleMarkdownToHtml(part.parts[0].text), true);
+                    chatHistory.forEach(entry => {
+                        // Ensure the history entry has the expected structure before rendering
+                        if (entry.role && entry.parts && entry.parts[0] && entry.parts[0].text) {
+                            if (entry.role === 'user') {
+                                addMessage('user', entry.parts[0].text);
+                            } else if (entry.role === 'model') {
+                                addMessage('stellar', simpleMarkdownToHtml(entry.parts[0].text), true);
+                            }
+                        }
+                        // Silently ignore tool call/response parts in the history display
                     });
                 }
             };
