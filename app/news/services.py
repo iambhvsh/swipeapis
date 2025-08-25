@@ -42,6 +42,7 @@ def validate_date_format(date_str: Optional[str]) -> Optional[str]:
 def get_news_service(
     q: Optional[str],
     num_results: int,
+    start: int,
     from_date: Optional[str],
     to_date: Optional[str],
     language: str,
@@ -74,10 +75,15 @@ def get_news_service(
             # Note: from_ and to_ are not supported for top_news.
             search_result = gn.top_news()
 
-        entries = search_result.get('entries', [])
+        # Fetch a larger batch to allow for pagination
+        # Note: The library itself doesn't have pages, so we fetch more and slice.
+        search_result.entries = search_result.get('entries', []) # Ensure entries are loaded
+
+        # Paginate the results
+        paginated_entries = search_result.entries[start : start + num_results]
 
         article_list = []
-        for entry in entries[:num_results]:
+        for entry in paginated_entries:
             description = clean_html(entry.get('summary', ''))
             article = {
                 "title": entry.get('title'),

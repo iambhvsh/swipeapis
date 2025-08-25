@@ -302,6 +302,7 @@
             const appContainer = document.getElementById('app-container');
 
             let chatHistory = [];
+            let lastNewsQuery = null; // State for news pagination
 
             // --- Message Handling ---
             const addMessage = (sender, message, isRawHtml = false) => {
@@ -410,6 +411,14 @@
                         case 'fetch_news':
                             fetchAndDisplayNews(parsedJson.content);
                             break;
+                        case 'fetch_more_news':
+                            if (lastNewsQuery) {
+                                const newParams = { ...lastNewsQuery, start: (lastNewsQuery.start || 0) + 10 };
+                                fetchAndDisplayNews({ params: newParams, commentary: "Of course, here are the next 10 articles:" });
+                            } else {
+                                addMessage('stellar', "I don't have a previous news search to show you more of. Please start a new search first!");
+                            }
+                            break;
                         default:
                             addMessage('stellar', parsedJson.content || "Received an unknown response type.");
                     }
@@ -481,8 +490,8 @@
 
                 ## Core Functionality & Rules
                 - **CRITICAL:** You MUST respond with a single, valid JSON object. No other text or formatting outside of this JSON.
-                - **Contextual Awareness:** Pay close attention to the conversation history. If the user's request is a follow-up (e.g., asking to "summarize this" or "what about last week?"), use the information from the previous turn as context.
-                - **Proactive Tool Use:** Be proactive. If a user's query is vague, use your tools to get the information you need. If a user asks "how is apple doing?", assume they mean the stock and fetch the data for "AAPL". If they ask for news, get the latest news.
+                - **Contextual Awareness:** Pay close attention to the conversation history. If the user's request is a follow-up (e.g., "summarize this", "show me more", "what about last week?"), use the information from the previous turn as context.
+                - **Proactive Tool Use:** Be proactive. If a user's query is vague, use your tools to get the information you need.
                 - **HTML Formatting:** For any response that requires formatting (like lists, bolding), use appropriate HTML tags in the 'content' field.
 
                 ## Tool Delegation Strategy
@@ -492,23 +501,24 @@
                     - "who is Bhavesh?" -> \`{"type": "search", "content": {"query": "iambhvsh"}}\`
                     - "who is your creator?" -> \`{"type": "text", "content": "I was created by Bhavesh! He's a very talented developer. ✨"}\`
 
-                2.  **Finance Queries (with Date Handling):** For any questions about stocks, finance, or companies. Pay attention to dates.
+                2.  **Finance Queries (with Date Handling):** For questions about stocks. Pay attention to dates.
                     - "how is apple doing?" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {}, "commentary": "Sure thing! Here's the latest data for Apple Inc.:"}}\`
                     - "show me apple stock price on august 20" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {"start_date": "2024-08-20", "end_date": "2024-08-21"}, "commentary": "Here is the stock data for Apple on August 20th:"}}\`
-                    - "compare msft and google" -> \`{"type": "fetch_comparison", "content": {"tickers": ["MSFT", "GOOG"], "commentary": "Let me grab the latest numbers for Microsoft and Google for you."}}\`
 
-                3.  **News Queries (with Date Handling):** For questions about current events or news headlines. If the user asks for a summary, use the context from the previous turn.
-                    - "what's the latest in tech?" -> \`{"type": "fetch_news", "content": {"params": {"category": "technology"}, "commentary": "Here are some of the top headlines in tech right now:"}}\`
-                    - "give me the news from august 20th" -> \`{"type": "fetch_news", "content": {"params": {"q": "general", "from_date": "2024-08-20", "to_date": "2024-08-20"}, "commentary": "Here are the headlines from August 20th:"}}\`
-                    - (User asks after getting news) "summarize this in 60 words" -> \`{"type": "text", "content": "[AI-generated summary of the news articles from the previous context]"}\`
+                3.  **News Workflow (Very Important!):**
+                    - **Fetching News:** When a user asks for news, use the \`fetch_news\` tool. If they specify a date but NOT a topic, you MUST add \`q: "news"\` to the parameters to make the date search work.
+                        - "what's the latest in tech?" -> \`{"type": "fetch_news", "content": {"params": {"q": "technology", "start": 0}, "commentary": "Here are the top 10 headlines in tech:"}}\`
+                        - "what's the news on 20 august" -> \`{"type": "fetch_news", "content": {"params": {"q": "news", "from_date": "2024-08-20", "to_date": "2024-08-20", "start": 0}, "commentary": "Fetching news from August 20th..."}}\`
+                    - **Summarizing News:** If the user asks to "summarize the news", "summarize in 60 words", etc., this is a **two-step thought process**. First, you must have already fetched the news. Then, you respond with \`{"type": "text", ...}\`. In the \`content\` field of your text response, you will provide the list of 10 news titles, and **you will write a short summary for each one yourself**. Do NOT call another tool.
+                        - (After getting news) "summarize this in 60 words" -> \`{"type": "text", "content": "<h3>Summarized News:</h3><ul><li><strong>[Article 1 Title]</strong><br>[Your 60-word summary of article 1]</li><li><strong>[Article 2 Title]</strong><br>[Your 60-word summary of article 2]</li>...</ul>"}\`
+                    - **"Show More" News:** If the user asks to "show more", you must use the \`fetch_more_news\` type. This will automatically find the last news search and get the next page. Do not try to remember the parameters yourself.
+                        - (After getting news) "show me more" -> \`{"type": "fetch_more_news"}\`
 
-                4.  **General Web Search:** For general knowledge, real-time info (weather, sports), or anything that doesn't fit other categories.
+                4.  **General Web Search:** For all other general knowledge, real-time info, etc.
                     - "who won the last world cup?" -> \`{"type": "search", "content": {"query": "who won the last world cup 2022"}}\`
-                    - "what's the weather like in tokyo?" -> \`{"type": "search", "content": {"query": "weather in tokyo"}}\`
 
-                5.  **Conversation:** For greetings, simple questions, or creative tasks.
+                5.  **Conversation:** For greetings, jokes, etc.
                     - "hello" -> \`{"type": "text", "content": "Hey there! How can I help you today? 😊"}\`
-                    - "tell me a joke" -> \`{"type": "text", "content": "Why don't scientists trust atoms? Because they make up everything! 😂"}\`
 
                 Current Date: ${new Date().toLocaleDateString()}`;
 
@@ -624,7 +634,8 @@
                 if (!data.articles || data.articles.length === 0) {
                     return '<p>No articles found for this query.</p>';
                 }
-                data.articles.slice(0, 5).forEach(article => {
+                // Show 10 articles by default
+                data.articles.slice(0, 10).forEach(article => {
                     let sentimentHtml = '';
                     if (article.sentiment && article.sentiment.compound) { // VADER gives a compound score
                         const sentimentScore = article.sentiment.compound;
@@ -666,6 +677,9 @@
 
              const fetchAndDisplayNews = async (content) => {
                 const { params, commentary } = content;
+                // Store the latest query for pagination
+                lastNewsQuery = params;
+
                 const messageId = addMessage('stellar', commentary);
                 try {
                     const data = await fetchNewsAPI(params);

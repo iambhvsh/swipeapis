@@ -14,7 +14,10 @@ async def get_news(
                     "If left empty, the endpoint will return top headlines."
     ),
     num_results: int = Query(
-        20, ge=1, le=100, description="The maximum number of articles to return."
+        10, ge=1, le=100, description="The maximum number of articles to return."
+    ),
+    start: int = Query(
+        0, ge=0, description="The starting index for pagination."
     ),
     from_date: Optional[str] = Query(
         None,
@@ -52,6 +55,7 @@ async def get_news(
         articles = get_news_service(
             q=q,
             num_results=num_results,
+            start=start,
             from_date=from_date,
             to_date=to_date,
             language=language,
