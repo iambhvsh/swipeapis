@@ -36,11 +36,12 @@ def google_search_service(
         # We pass advanced=True to get SearchResult objects instead of just URLs.
         results_generator = google_search_lib(
             q,
+            tld='com', # Make search more consistent
             num_results=num_results,
             lang=language,
             start_num=start,
             safe='active' if safe else 'off',
-            sleep_interval=1.0,  # A short pause to avoid being rate-limited.
+            sleep_interval=2.0,  # A short pause to avoid being rate-limited.
             advanced=True
         )
 
