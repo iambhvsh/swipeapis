@@ -59,25 +59,27 @@ def get_news_service(
 
     try:
         gn = GoogleNews(lang=language.lower(), country=region.upper())
+        search_result = None
 
         # Logic to switch between a targeted search and fetching top news.
         if q:
             full_query = q
             if category:
-                # The 'when' operator is a Google search trick, not a formal
-                # feature of the library.
                 full_query += f" when:{category}"
-            search_result = gn.search(
-                full_query, from_=valid_from, to_=valid_to
-            )
+            try:
+                search_result = gn.search(full_query, from_=valid_from, to_=valid_to)
+            except Exception as e:
+                raise NewsFetchingError(f"The underlying news library failed on search: {e}")
         else:
-            # If no query, get top news.
-            # Note: from_ and to_ are not supported for top_news.
-            search_result = gn.top_news()
+            try:
+                search_result = gn.top_news()
+            except Exception as e:
+                raise NewsFetchingError(f"The underlying news library failed on top_news: {e}")
 
-        # Fetch a larger batch to allow for pagination
-        # Note: The library itself doesn't have pages, so we fetch more and slice.
-        search_result.entries = search_result.get('entries', []) # Ensure entries are loaded
+        if not search_result:
+             raise NewsFetchingError("News service did not return a result.")
+
+        entries = search_result.get('entries', [])
 
         # Paginate the results
         paginated_entries = search_result.entries[start : start + num_results]

@@ -14,19 +14,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- Apple Human Interface Guidelines Inspired Styles --- */
+        /* --- Vercel Geist UI Inspired Styles --- */
         :root {
-            --bg-light: #f5f5f7;
+            --bg-light: #ffffff;
             --bg-dark: #000000;
-            --text-light: #1d1d1f;
-            --text-dark: #f5f5f7;
+            --text-light: #000000;
+            --text-dark: #ffffff;
             --panel-light: #ffffff;
-            --panel-dark: #1c1c1e;
-            --border-light: #d2d2d7;
-            --border-dark: #38383a;
-            --accent: #007aff;
-            --input-bg-light: #f0f0f5;
-            --input-bg-dark: #2c2c2e;
+            --panel-dark: #111111;
+            --border-light: #eaeaea;
+            --border-dark: #333333;
+            --accent: #0070f3;
+            --geist-gray: #666666;
+            --geist-light-gray: #888888;
         }
 
         html,
@@ -37,7 +37,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.2s, color 0.2s;
             display: flex;
             flex-direction: column;
         }
@@ -53,100 +53,96 @@
         }
 
         .panel {
-            transition: background-color 0.3s;
-        }
-
-        .light-theme .panel {
-            background-color: var(--panel-light);
+            transition: background-color 0.2s;
             border-color: var(--border-light);
         }
-
         .dark-theme .panel {
-            background-color: var(--panel-dark);
             border-color: var(--border-dark);
         }
 
+        .light-theme .panel { background-color: var(--panel-light); }
+        .dark-theme .panel { background-color: var(--panel-dark); }
+
         .chat-bubble {
-            max-width: 85%;
-            padding: 12px 18px;
-            border-radius: 22px;
+            max-width: 90%;
+            padding: 10px 16px;
+            border-radius: 8px;
             word-wrap: break-word;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .user-bubble {
             background-color: var(--accent);
             color: white;
-            border-bottom-right-radius: 6px;
         }
 
-        /* AI response bubble styling removed as requested */
         .stellar-bubble {
-            padding-left: 0; /* Align text to the left */
-            padding-right: 0;
-        }
-
-        .light-theme .stellar-bubble {
             background-color: transparent;
-            color: var(--text-light);
-        }
-
-        .dark-theme .stellar-bubble {
-            background-color: transparent;
-            color: var(--text-dark);
+            padding: 0;
         }
 
         .stellar-bubble a {
             color: var(--accent);
-            text-decoration: underline;
+            text-decoration: none;
+            border-bottom: 1px solid var(--accent);
+        }
+        .stellar-bubble a:hover {
+            background-color: var(--accent);
+            color: white;
         }
 
         .stellar-bubble ul {
             list-style-position: inside;
             padding-left: 8px;
         }
+        .stellar-bubble h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
 
         .toolbar-icon {
             cursor: pointer;
-            transition: transform 0.2s ease, color 0.2s;
-            border-radius: 50%;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: color 0.2s ease;
+            color: var(--geist-gray);
         }
 
         .toolbar-icon:hover {
-            transform: scale(1.1);
-        }
-
-        .light-theme .toolbar-icon {
-            color: #555;
-        }
-
-        .dark-theme .toolbar-icon {
-            color: #aaa;
+            color: var(--accent);
         }
 
         .input-field {
             background: transparent;
-            border: none;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
             outline: none;
             width: 100%;
-            padding: 14px 20px;
+            padding: 12px 18px;
             font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .dark-theme .input-field {
+            border-color: var(--border-dark);
+        }
+        .input-field:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
         }
 
-        .light-theme .input-field-container {
-            background-color: var(--input-bg-light);
-        }
 
-        .dark-theme .input-field-container {
-            background-color: var(--input-bg-dark);
+        #send-button {
+            background-color: var(--accent);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            transition: background-color 0.2s;
+        }
+        #send-button:hover {
+            background-color: #0056b3;
         }
 
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -154,38 +150,30 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .dark-theme ::-webkit-scrollbar-thumb {
+            background: #444;
         }
 
         .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeIn 0.3s ease-out forwards;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .switch {
             position: relative;
             display: inline-block;
-            width: 50px;
-            height: 28px;
+            width: 46px;
+            height: 26px;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
@@ -195,8 +183,8 @@
             right: 0;
             bottom: 0;
             background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
+            transition: .3s;
+            border-radius: 26px;
         }
 
         .slider:before {
@@ -204,10 +192,10 @@
             content: "";
             height: 20px;
             width: 20px;
-            left: 4px;
-            bottom: 4px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
-            transition: .4s;
+            transition: .3s;
             border-radius: 50%;
         }
 
@@ -216,26 +204,28 @@
         }
 
         input:checked+.slider:before {
-            transform: translateX(22px);
+            transform: translateX(20px);
         }
 
         .data-card {
             margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid;
+            padding: 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
         }
-
-        .light-theme .data-card { border-color: rgba(0, 0, 0, 0.1); }
-        .dark-theme .data-card { border-color: rgba(255, 255, 255, 0.1); }
+        .dark-theme .data-card {
+            border-color: var(--border-dark);
+        }
 
         .news-article {
             margin-top: 10px;
             padding-bottom: 10px;
-            border-bottom: 1px solid;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .dark-theme .news-article {
+            border-color: var(--border-dark);
         }
         .news-article:last-child { border-bottom: none; }
-        .light-theme .news-article { border-color: rgba(0, 0, 0, 0.08); }
-        .dark-theme .news-article { border-color: rgba(255, 255, 255, 0.08); }
     </style>
 </head>
 
@@ -345,12 +335,15 @@
                 }
             };
 
-            const showTypingIndicator = () => {
-                if (document.getElementById('typing-indicator')) return;
+            const showTypingIndicator = (message = null) => {
+                hideTypingIndicator(); // Remove any existing indicator
                 const typingElement = document.createElement('div');
                 typingElement.id = 'typing-indicator';
                 typingElement.className = 'w-full flex justify-start fade-in';
-                typingElement.innerHTML = `<div class="chat-bubble stellar-bubble flex items-center space-x-1"><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span></div>`;
+                const content = message
+                    ? `<p class="text-sm text-gray-500 dark:text-gray-400">${message}</p>`
+                    : `<div class="chat-bubble stellar-bubble flex items-center space-x-1"><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span></div>`;
+                typingElement.innerHTML = content;
                 chatMessages.appendChild(typingElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             };
@@ -431,14 +424,16 @@
 
             const handleSearchAndRespond = async (content, originalUserInput) => {
                 const { query } = content;
-                const messageId = addMessage('stellar', `Searching for: "${query}"...`);
+                showTypingIndicator(`Searching for "${query}"...`);
                 try {
                     const searchResults = await googleSearchAPI(query);
                     if (!searchResults.results || searchResults.results.length === 0) {
-                        updateMessage(messageId, `I couldn't find any results for "${query}".`);
+                        hideTypingIndicator();
+                        addMessage('stellar', `I couldn't find any results for "${query}".`);
                         return;
                     }
-                    updateMessage(messageId, `Analyzing search results for: "${query}"...`);
+
+                    showTypingIndicator('Analyzing search results...');
                     let searchDataForAI = "Here are the top Google search results. Please synthesize this information to provide a comprehensive answer to the user's original query. Respond in clear, well-formatted HTML if necessary.\n\n";
                     searchResults.results.forEach(res => {
                         searchDataForAI += `Title: ${res.title}\nURL: ${res.url}\nDescription: ${res.description}\n\n`;
@@ -562,29 +557,24 @@
 
             const fetchViaProxy = async (endpoint) => {
                 const finalUrl = CONFIG.PROXY_URL + encodeURIComponent(`${CONFIG.API_BASE_URL}${endpoint}`);
-                let lastError = null;
-                for (let i = 0; i < 3; i++) {
-                    try {
-                        const response = await fetch(finalUrl);
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            throw new Error(`API request to ${endpoint} failed with status: ${response.status}. Body: ${errorText}`);
-                        }
-                        const data = await response.json();
-                        if (data.error) {
-                            throw new Error(`API at ${endpoint} returned an error: ${data.error.message || data.error}`);
-                        }
-                        return data;
-                    } catch (error) {
-                        lastError = error;
-                        console.warn(`Attempt ${i + 1} failed for ${endpoint}:`, error);
-                        if (i < 2) {
-                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                        }
+                try {
+                    const response = await fetch(finalUrl);
+                    const data = await response.json(); // Always try to parse JSON
+                    if (!response.ok) {
+                        // Use the error message from the backend if available, otherwise use a generic message
+                        const errorMessage = data.detail || `API request failed with status: ${response.status}`;
+                        throw new Error(errorMessage);
                     }
+                    if (data.error) { // Handle application-level errors returned by the API
+                        throw new Error(data.error.message || 'An unknown API error occurred');
+                    }
+                    return data;
+                } catch (error) {
+                    // Catch fetch errors (network issues) or JSON parsing errors
+                    console.error(`Error fetching from ${endpoint}:`, error);
+                    // Re-throw the error so the calling function can handle it
+                    throw error;
                 }
-                console.error(`Error fetching from ${endpoint} after multiple retries:`, lastError);
-                throw lastError;
             };
 
             // --- API-specific functions ---
@@ -681,55 +671,55 @@
             // --- High-Level Fetch & Display Functions ---
             const fetchAndDisplayStock = async (content) => {
                 const { ticker, params, commentary } = content;
-                const messageId = addMessage('stellar', commentary);
+                showTypingIndicator(commentary);
                 try {
                     const data = await fetchStockAPI(ticker, params);
+                    hideTypingIndicator();
 
-                    // If the user requested a specific date
                     if (params.start_date) {
                         if (data.historical && data.historical.length > 0) {
-                            // Use the new historical formatter for the first result
                             const stockHtml = formatHistoricalStockDataAsHtml(data.historical[0]);
-                            updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
+                            addMessage('stellar', `<p>${commentary}</p>${stockHtml}`, true);
                         } else {
-                            updateMessage(messageId, `I couldn't find any historical data for ${ticker} on that date. It might have been a holiday or a non-trading day.`);
+                            addMessage('stellar', `I couldn't find any historical data for ${ticker} on that date. It might have been a holiday or a non-trading day.`);
                         }
                     } else {
-                        // Otherwise, use the default current-day formatter
                         if (data.price == null) {
-                            updateMessage(messageId, `I'm sorry, but I couldn't retrieve valid financial data for "${ticker}". Please ensure the ticker symbol is correct and not delisted.`);
+                            addMessage('stellar', `I'm sorry, but I couldn't retrieve valid financial data for "${ticker}". Please ensure the ticker symbol is correct and not delisted.`);
                             return;
                         }
                         const stockHtml = formatStockDataAsHtml(data);
-                        updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
+                        addMessage('stellar', `<p>${commentary}</p>${stockHtml}`, true);
                     }
                 } catch (error) {
+                    hideTypingIndicator();
                     console.error("Stock fetch error:", error);
-                    updateMessage(messageId, `I couldn't retrieve data for ${ticker}. The API might be temporarily unavailable or the ticker is incorrect.`);
+                    addMessage('stellar', `Sorry, I ran into an error trying to get stock data: ${error.message}`);
                 }
             };
 
              const fetchAndDisplayNews = async (content) => {
                 const { params, commentary } = content;
-                // Store the latest query for pagination
-                lastNewsQuery = params;
-
-                const messageId = addMessage('stellar', commentary);
+                lastNewsQuery = params; // Store for pagination
+                showTypingIndicator(commentary);
                 try {
                     const data = await fetchNewsAPI(params);
+                    hideTypingIndicator();
                     const newsHtml = formatNewsDataAsHtml(data);
-                    updateMessage(messageId, `<p>${commentary}</p>${newsHtml}`, true);
+                    addMessage('stellar', `<p>${commentary}</p>${newsHtml}`, true);
                 } catch (error) {
+                    hideTypingIndicator();
                     console.error("News fetch error:", error);
-                    updateMessage(messageId, `I couldn't retrieve the latest news. Please try again.`);
+                    addMessage('stellar', `Sorry, I ran into an error trying to get the news: ${error.message}`);
                 }
             };
 
             const fetchAndCompareStocks = async (content) => {
                 const { tickers, commentary } = content;
-                const messageId = addMessage('stellar', `${commentary} One moment...`);
+                showTypingIndicator(commentary);
                 try {
                     const results = await Promise.all(tickers.map(ticker => fetchStockAPI(ticker)));
+                    showTypingIndicator('Analyzing comparison data...');
                     let dataForAI = "Here is the real-time stock data. Please provide a detailed comparison in HTML format.\n\n";
                     results.forEach(data => {
                         const change = data.price - data.previous_close;
