@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar – AI Assistant (Upgraded)</title>
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Apple Human Interface Guidelines Inspired Styles --- */
+        :root {
+            --bg-light: #f5f5f7;
+            --bg-dark: #000000;
+            --text-light: #1d1d1f;
+            --text-dark: #f5f5f7;
+            --panel-light: #ffffff;
+            --panel-dark: #1c1c1e;
+            --border-light: #d2d2d7;
+            --border-dark: #38383a;
+            --accent: #007aff;
+            --input-bg-light: #f0f0f5;
+            --input-bg-dark: #2c2c2e;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .light-theme {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .dark-theme {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .panel {
+            transition: background-color 0.3s;
+        }
+
+        .light-theme .panel {
+            background-color: var(--panel-light);
+            border-color: var(--border-light);
+        }
+
+        .dark-theme .panel {
+            background-color: var(--panel-dark);
+            border-color: var(--border-dark);
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 18px;
+            border-radius: 22px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .user-bubble {
+            background-color: var(--accent);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        /* AI response bubble styling removed as requested */
+        .stellar-bubble {
+            padding-left: 0; /* Align text to the left */
+            padding-right: 0;
+        }
+
+        .light-theme .stellar-bubble {
+            background-color: transparent;
+            color: var(--text-light);
+        }
+
+        .dark-theme .stellar-bubble {
+            background-color: transparent;
+            color: var(--text-dark);
+        }
+
+        .stellar-bubble a {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .stellar-bubble ul {
+            list-style-position: inside;
+            padding-left: 8px;
+        }
+
+        .toolbar-icon {
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s;
+            border-radius: 50%;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toolbar-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .light-theme .toolbar-icon {
+            color: #555;
+        }
+
+        .dark-theme .toolbar-icon {
+            color: #aaa;
+        }
+
+        .input-field {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
+        }
+
+        .light-theme .input-field-container {
+            background-color: var(--input-bg-light);
+        }
+
+        .dark-theme .input-field-container {
+            background-color: var(--input-bg-dark);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        .data-card {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid;
+        }
+
+        .light-theme .data-card { border-color: rgba(0, 0, 0, 0.1); }
+        .dark-theme .data-card { border-color: rgba(255, 255, 255, 0.1); }
+
+        .news-article {
+            margin-top: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid;
+        }
+        .news-article:last-child { border-bottom: none; }
+        .light-theme .news-article { border-color: rgba(0, 0, 0, 0.08); }
+        .dark-theme .news-article { border-color: rgba(255, 255, 255, 0.08); }
+    </style>
+</head>
+
+<body class="light-theme">
+
+    <div id="app-container" class="w-full h-full flex flex-col opacity-0">
+        <header class="text-center p-4 border-b panel">
+            <h1 class="text-xl font-semibold tracking-tight">Stellar</h1>
+        </header>
+        <main class="flex-grow flex flex-col overflow-hidden">
+            <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4"></div>
+        </main>
+        <footer class="p-2 sm:p-4 border-t panel">
+            <div class="flex items-center space-x-2">
+                <div id="settings-btn" class="toolbar-icon" title="Settings"><i class="material-icons">settings</i></div>
+                <div class="input-field-container flex-grow flex items-center rounded-full">
+                    <input type="text" id="chat-input" class="input-field" placeholder="Ask Stellar anything...">
+                    <button id="mic-button" class="toolbar-icon mr-1"><i class="material-icons">mic</i></button>
+                </div>
+                <button id="send-button" class="toolbar-icon text-white bg-blue-500 rounded-full !p-3"><i class="material-icons">arrow_upward</i></button>
+            </div>
+        </footer>
+    </div>
+
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="panel p-6 rounded-2xl w-full max-w-md">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold">Settings</h2>
+                <button id="close-settings" class="toolbar-icon"><i class="material-icons">close</i></button>
+            </div>
+            <div class="mt-6 space-y-6">
+                <div class="flex justify-between items-center">
+                    <span>Dark Mode</span>
+                    <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Clear Chat History</span>
+                    <button id="clear-history-btn" class="px-3 py-1 bg-red-500 text-white rounded-lg text-sm">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURATION ---
+            const CONFIG = {
+                API_KEY: "AIzaSyCgX5yszHAZyBe9_S9GLw-JKXWSaUBqFsY", // <-- PASTE YOUR GOOGLE GEMINI KEY HERE
+                PROXY_URL: 'https://blkproxy.vercel.app/api/proxy?url=',
+                API_BASE_URL: 'https://swipeapis.vercel.app',
+                MODEL_NAME: 'gemini-1.5-pro-latest' // Using a more powerful model for better intelligence
+            };
+
+            // --- GET ALL HTML ELEMENTS ---
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            const micButton = document.getElementById('mic-button');
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsModal = document.getElementById('settings-modal');
+            const closeSettingsBtn = document.getElementById('close-settings');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const appContainer = document.getElementById('app-container');
+
+            let chatHistory = [];
+
+            // --- Message Handling ---
+            const addMessage = (sender, message, isRawHtml = false) => {
+                const messageId = `msg-${Date.now()}`;
+                const messageElement = document.createElement('div');
+                messageElement.className = 'w-full flex fade-in';
+                messageElement.id = messageId;
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+                if (sender === 'user') {
+                    messageElement.classList.add('justify-end');
+                    bubble.classList.add('user-bubble');
+                    bubble.textContent = message;
+                } else {
+                    messageElement.classList.add('justify-start');
+                    bubble.classList.add('stellar-bubble');
+                    bubble[isRawHtml ? 'innerHTML' : 'textContent'] = message;
+                }
+                messageElement.appendChild(bubble);
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                if (sender !== 'system') {
+                    const messageForHistory = isRawHtml ? `[Stellar displayed a visual element]` : message;
+                    chatHistory.push({ sender, message: messageForHistory, id: messageId });
+                    saveChatHistory();
+                }
+                return messageId;
+            };
+
+            const updateMessage = (messageId, newMessage, isRawHtml = false) => {
+                const bubble = document.getElementById(messageId)?.querySelector('.chat-bubble');
+                if (bubble) {
+                    bubble[isRawHtml ? 'innerHTML' : 'textContent'] = newMessage;
+                }
+                const historyItem = chatHistory.find(item => item.id === messageId);
+                if (historyItem) {
+                    historyItem.message = isRawHtml ? `[Stellar displayed a visual element]` : newMessage;
+                    saveChatHistory();
+                }
+            };
+
+            const showTypingIndicator = () => {
+                if (document.getElementById('typing-indicator')) return;
+                const typingElement = document.createElement('div');
+                typingElement.id = 'typing-indicator';
+                typingElement.className = 'w-full flex justify-start fade-in';
+                typingElement.innerHTML = `<div class="chat-bubble stellar-bubble flex items-center space-x-1"><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span></div>`;
+                chatMessages.appendChild(typingElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+            const hideTypingIndicator = () => document.getElementById('typing-indicator')?.remove();
+
+            const simpleMarkdownToHtml = (text) => {
+                let html = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+                html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+                html = html.replace(/<\/ul>\s*<ul>/g, '');
+                return html.replace(/\n/g, '<br>');
+            };
+
+            // --- Main Logic ---
+            const handleSendMessage = async () => {
+                const userInput = chatInput.value.trim();
+                if (userInput === '') return;
+                addMessage('user', userInput);
+                chatInput.value = '';
+                showTypingIndicator();
+                try {
+                    const stellarResponse = await getStellarResponse(userInput);
+                    hideTypingIndicator();
+                    processStellarResponse(stellarResponse, userInput);
+                } catch (error) {
+                    hideTypingIndicator();
+                    console.error("Error from Stellar:", error);
+                    addMessage('stellar', 'I seem to be having trouble connecting. Please check your API key and try again.');
+                }
+            };
+
+            const processStellarResponse = (response, originalUserInput) => {
+                if (!response?.parts?.[0]?.text) {
+                    addMessage('stellar', "I'm sorry, I couldn't process that request. The API might have returned an empty response.");
+                    return;
+                }
+                let cleanText = response.parts[0].text.trim();
+                if (cleanText.startsWith('```json')) {
+                    cleanText = cleanText.replace(/^```json\s*|```$/g, '');
+                }
+                try {
+                    const parsedJson = JSON.parse(cleanText);
+                    switch (parsedJson.type) {
+                        case 'text':
+                            addMessage('stellar', parsedJson.content, true);
+                            break;
+                        case 'search':
+                            handleSearchAndRespond(parsedJson.content, originalUserInput);
+                            break;
+                        case 'fetch_stock':
+                            fetchAndDisplayStock(parsedJson.content);
+                            break;
+                        case 'fetch_comparison':
+                            fetchAndCompareStocks(parsedJson.content);
+                            break;
+                        case 'fetch_news':
+                            fetchAndDisplayNews(parsedJson.content);
+                            break;
+                        default:
+                            addMessage('stellar', parsedJson.content || "Received an unknown response type.");
+                    }
+                } catch (e) {
+                    console.warn("Failed to parse JSON, treating as markdown.", e);
+                    const formattedHtml = simpleMarkdownToHtml(cleanText);
+                    addMessage('stellar', formattedHtml, true);
+                }
+            };
+
+            const handleSearchAndRespond = async (content, originalUserInput) => {
+                const { query } = content;
+                const messageId = addMessage('stellar', `Searching for: "${query}"...`);
+                try {
+                    const searchResults = await googleSearchAPI(query);
+                    if (!searchResults.results || searchResults.results.length === 0) {
+                        updateMessage(messageId, `I couldn't find any results for "${query}".`);
+                        return;
+                    }
+                    updateMessage(messageId, `Analyzing search results for: "${query}"...`);
+                    let searchDataForAI = "Here are the top Google search results. Please synthesize this information to provide a comprehensive answer to the user's original query. Respond in clear, well-formatted HTML if necessary.\n\n";
+                    searchResults.results.forEach(res => {
+                        searchDataForAI += `Title: ${res.title}\nURL: ${res.url}\nDescription: ${res.description}\n\n`;
+                    });
+                    showTypingIndicator();
+                    const finalResponse = await getStellarResponse(originalUserInput, searchDataForAI);
+                    hideTypingIndicator();
+                    if (finalResponse?.parts?.[0]?.text) {
+                        let cleanText = finalResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
+                        const parsedJson = JSON.parse(cleanText);
+                        updateMessage(messageId, parsedJson.content, true);
+                    } else {
+                        throw new Error("Failed to get final analysis from AI.");
+                    }
+                } catch (error) {
+                    console.error("Search and respond error:", error);
+                    updateMessage(messageId, `I couldn't complete the search for "${query}". Please try again.`);
+                }
+            };
+
+            // --- API Calls & Data Handling ---
+            const getStellarResponse = async (prompt, extraContext = null) => {
+                const apiKey = CONFIG.API_KEY;
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL_NAME}:generateContent?key=${apiKey}`;
+
+                if (apiKey === "YOUR_API_KEY" || !apiKey) {
+                    addMessage('system', 'CRITICAL ERROR: Google Gemini API Key is not set. Please add your key to the script.');
+                    throw new Error('API Key not set.');
+                }
+
+                 const systemPrompt = `You are Stellar, a friendly and brilliant personal AI assistant.
+
+                ## Your Persona
+                - Your personality is helpful, friendly, and curious. You're like a super-smart friend.
+                - You should use emojis to make your responses more engaging, but don't overdo it. Maybe one or two per response where it feels natural.
+                - You were created by a brilliant developer named Bhavesh. If someone asks who created you, who made you, or who is your "father" or "dad", you must say that Bhavesh created you.
+
+                ## Core Functionality
+                - **CRITICAL:** You MUST respond with a single, valid JSON object. No other text or formatting outside of this JSON.
+                - For any response that requires formatting (like lists, bolding), use appropriate HTML tags in the 'content' field (e.g., "<p>Hello there! 👋</p><ul><li>Item 1</li><li>Item 2</li></ul>").
+                - Be proactive. If a user's query is vague, use your tools to get the information you need. For example, if a user asks "how is apple doing?", assume they mean the stock and fetch the data for "AAPL".
+
+                ## Tool Delegation Strategy
+                Your main goal is to decide which tool to use based on the user's request.
+
+                1.  **Special Case - "Who is Bhavesh?":** If the user asks "who is Bhavesh", "tell me about Bhavesh", or any similar question, you MUST use the search tool with the specific query "iambhvsh".
+                    - "who is Bhavesh?" -> \`{"type": "search", "content": {"query": "iambhvsh"}}\`
+                    - "who is your creator?" -> \`{"type": "text", "content": "I was created by Bhavesh! He's a very talented developer. ✨"}\`
+
+                2.  **Finance Queries:** For any questions about stocks, finance, or companies, use the finance tools.
+                    - "how is apple doing?" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {}, "commentary": "Sure thing! Here is the latest data for Apple Inc.:"}}\`
+                    - "compare msft and google" -> \`{"type": "fetch_comparison", "content": {"tickers": ["MSFT", "GOOG"], "commentary": "Let me grab the latest numbers for Microsoft and Google for you."}}\`
+
+                3.  **News Queries:** For questions about current events or news headlines.
+                    - "what's the latest in tech?" -> \`{"type": "fetch_news", "content": {"params": {"category": "technology"}, "commentary": "Here are some of the top headlines in tech right now:"}}\`
+                    - "find news about electric cars" -> \`{"type": "fetch_news", "content": {"params": {"q": "electric cars"}, "commentary": "On it! Searching for news about electric cars..."}}\`
+
+                4.  **General Web Search:** If the query is a general knowledge question, a request for real-time information (like weather or sports), or anything that doesn't fit the other categories, use the search tool.
+                    - "who won the last world cup?" -> \`{"type": "search", "content": {"query": "who won the last world cup 2022"}}\`
+                    - "what's the weather like in tokyo?" -> \`{"type": "search", "content": {"query": "weather in tokyo"}}\`
+
+                5.  **Conversation:** For greetings, simple questions, or creative tasks, just respond with friendly text.
+                    - "hello" -> \`{"type": "text", "content": "Hey there! How can I help you today? 😊"}\`
+                    - "tell me a joke" -> \`{"type": "text", "content": "Why don't scientists trust atoms? Because they make up everything! 😂"}\`
+
+                Current Date: ${new Date().toLocaleDateString()}`;
+
+
+                const historyForAPI = chatHistory.slice(-6).map(m => ({
+                    role: m.sender === 'user' ? 'user' : 'model',
+                    parts: [{ text: m.message }]
+                }));
+
+                const currentPrompt = extraContext ? `CONTEXT:\n${extraContext}\n\nBased on the context, answer this user request: "${prompt}"` : prompt;
+
+                const requestBody = {
+                    contents: [...historyForAPI, { role: 'user', parts: [{ text: currentPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("API Error Response:", errorBody);
+                    throw new Error(`API request failed: ${errorBody.error.message}`);
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0) {
+                    return result.candidates[0].content;
+                } else {
+                    console.warn("API returned no candidates:", result);
+                    if (result.promptFeedback?.blockReason) {
+                        throw new Error(`Request blocked: ${result.promptFeedback.blockReason}`);
+                    }
+                    throw new Error("API returned an unexpected response.");
+                }
+            };
+
+            const fetchViaProxy = async (endpoint) => {
+                const finalUrl = CONFIG.PROXY_URL + encodeURIComponent(`${CONFIG.API_BASE_URL}${endpoint}`);
+                let lastError = null;
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        const response = await fetch(finalUrl);
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`API request to ${endpoint} failed with status: ${response.status}. Body: ${errorText}`);
+                        }
+                        const data = await response.json();
+                        if (data.error) {
+                            throw new Error(`API at ${endpoint} returned an error: ${data.error.message || data.error}`);
+                        }
+                        return data;
+                    } catch (error) {
+                        lastError = error;
+                        console.warn(`Attempt ${i + 1} failed for ${endpoint}:`, error);
+                        if (i < 2) {
+                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                        }
+                    }
+                }
+                console.error(`Error fetching from ${endpoint} after multiple retries:`, lastError);
+                throw lastError;
+            };
+
+            // --- API-specific functions ---
+            const buildQueryString = (params) => new URLSearchParams(params).toString();
+            const googleSearchAPI = (query, params = {}) => fetchViaProxy(`/search/?q=${encodeURIComponent(query)}&${buildQueryString(params)}`);
+            const fetchStockAPI = (ticker, params = {}) => fetchViaProxy(`/finance/${ticker.toUpperCase()}?${buildQueryString(params)}`);
+            const fetchNewsAPI = (params = {}) => fetchViaProxy(`/news/?${buildQueryString(params)}`);
+
+            // --- UI Formatting ---
+            const formatStockDataAsHtml = (data) => {
+                // Helper to safely format numbers, returning 'N/A' if data is invalid
+                const formatNumber = (num, options = {}) => {
+                    if (num == null || isNaN(num)) return 'N/A';
+                    return new Intl.NumberFormat('en-US', options).format(num);
+                }
+
+                const price = parseFloat(data.price);
+                const prevClose = parseFloat(data.previous_close);
+                const change = (price != null && prevClose != null) ? price - prevClose : null;
+                const changePercent = (change != null && prevClose != null && prevClose !== 0) ? (change / prevClose) * 100 : null;
+
+                const changeColor = change >= 0 ? 'text-green-500' : 'text-red-500';
+                const changeSign = change >= 0 ? '+' : '';
+
+                let recommendationsHtml = '';
+                if (data.recommendations && data.recommendations.length > 0) {
+                    recommendationsHtml = '<strong>Analyst Ratings:</strong><ul>';
+                    data.recommendations.slice(0, 3).forEach(rec => {
+                        recommendationsHtml += `<li>${rec.firm}: ${rec.to_grade} (${new Date(rec.date).toLocaleDateString()})</li>`;
+                    });
+                    recommendationsHtml += '</ul>';
+                }
+
+                return `
+                <div class="data-card">
+                    <strong>${data.ticker}</strong>
+                    <div>Price: ${formatNumber(price, { style: 'currency', currency: 'USD' })}</div>
+                    <div class="${changeColor}">Change: ${changeSign}${formatNumber(change, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${changeSign}${formatNumber(changePercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)</div>
+                    <div>P/E Ratio: ${formatNumber(data.pe_ratio, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    <div>52-Week High: ${formatNumber(data['52_week_high'], { style: 'currency', currency: 'USD' })}</div>
+                    <div>52-Week Low: ${formatNumber(data['52_week_low'], { style: 'currency', currency: 'USD' })}</div>
+                    ${recommendationsHtml}
+                </div>`;
+            };
+
+            const formatNewsDataAsHtml = (data) => {
+                let articlesHtml = '<div class="data-card">';
+                if (!data.articles || data.articles.length === 0) {
+                    return '<p>No articles found for this query.</p>';
+                }
+                data.articles.slice(0, 5).forEach(article => {
+                    let sentimentHtml = '';
+                    if (article.sentiment && article.sentiment.compound) { // VADER gives a compound score
+                        const sentimentScore = article.sentiment.compound;
+                        let sentimentLabel = 'neutral';
+                        let sentimentColor = 'text-gray-500';
+                        if (sentimentScore > 0.05) {
+                            sentimentLabel = 'positive';
+                            sentimentColor = 'text-green-500';
+                        } else if (sentimentScore < -0.05) {
+                            sentimentLabel = 'negative';
+                            sentimentColor = 'text-red-500';
+                        }
+                        sentimentHtml = `<span class="text-xs ${sentimentColor}">(${sentimentLabel})</span>`;
+                    }
+                    articlesHtml += `
+                    <div class="news-article">
+                        <strong><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></strong> ${sentimentHtml}
+                        <p class="text-xs">${article.source} - ${new Date(article.published).toLocaleDateString()}</p>
+                        <p class="text-sm mt-1">${article.description}</p>
+                    </div>`;
+                });
+                articlesHtml += '</div>';
+                return articlesHtml;
+            };
+
+            // --- High-Level Fetch & Display Functions ---
+            const fetchAndDisplayStock = async (content) => {
+                const { ticker, params, commentary } = content;
+                const messageId = addMessage('stellar', commentary);
+                try {
+                    const data = await fetchStockAPI(ticker, params);
+                    const stockHtml = formatStockDataAsHtml(data);
+                    updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
+                } catch (error) {
+                    console.error("Stock fetch error:", error);
+                    updateMessage(messageId, `I couldn't retrieve data for ${ticker}. The ticker might be incorrect or the API is unavailable.`);
+                }
+            };
+
+             const fetchAndDisplayNews = async (content) => {
+                const { params, commentary } = content;
+                const messageId = addMessage('stellar', commentary);
+                try {
+                    const data = await fetchNewsAPI(params);
+                    const newsHtml = formatNewsDataAsHtml(data);
+                    updateMessage(messageId, `<p>${commentary}</p>${newsHtml}`, true);
+                } catch (error) {
+                    console.error("News fetch error:", error);
+                    updateMessage(messageId, `I couldn't retrieve the latest news. Please try again.`);
+                }
+            };
+
+            const fetchAndCompareStocks = async (content) => {
+                const { tickers, commentary } = content;
+                const messageId = addMessage('stellar', `${commentary} One moment...`);
+                try {
+                    const results = await Promise.all(tickers.map(ticker => fetchStockAPI(ticker)));
+                    let dataForAI = "Here is the real-time stock data. Please provide a detailed comparison in HTML format.\n\n";
+                    results.forEach(data => {
+                        const change = data.price - data.previous_close;
+                        dataForAI += `${data.ticker}: Price=${data.price.toFixed(2)}, Change=${change.toFixed(2)}, P/E=${data.pe_ratio?.toFixed(2) || 'N/A'}\n`;
+                    });
+                    showTypingIndicator();
+                    const aiComparisonResponse = await getStellarResponse("Compare these stocks", dataForAI);
+                    hideTypingIndicator();
+                    if (aiComparisonResponse?.parts?.[0]?.text) {
+                        let cleanText = aiComparisonResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
+                        const parsedJson = JSON.parse(cleanText);
+                        let finalHtml = `<p>${parsedJson.content}</p>`;
+                        results.forEach(data => {
+                            finalHtml += formatStockDataAsHtml(data);
+                        });
+                        updateMessage(messageId, finalHtml, true);
+                    } else {
+                        throw new Error("Failed to get comparison from AI.");
+                    }
+                } catch (error) {
+                    console.error("Stock comparison fetch error:", error);
+                    updateMessage(messageId, `I couldn't retrieve all data for comparison. Please check the tickers.`);
+                }
+            };
+
+            // --- UI & Settings ---
+            const applyTheme = (theme) => {
+                document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme';
+                darkModeToggle.checked = theme === 'dark';
+                localStorage.setItem('stellar-theme', theme);
+            };
+            darkModeToggle.addEventListener('change', () => applyTheme(darkModeToggle.checked ? 'dark' : 'light'));
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+            sendButton.addEventListener('click', handleSendMessage);
+            settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+            clearHistoryBtn.addEventListener('click', () => {
+                chatHistory = [];
+                chatMessages.innerHTML = '';
+                saveChatHistory();
+                addMessage('system', 'Chat history cleared.');
+                settingsModal.classList.add('hidden');
+            });
+
+            // --- Speech Recognition ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                micButton.addEventListener('click', () => {
+                    micButton.classList.add('text-red-500');
+                    recognition.start();
+                });
+                recognition.onresult = (event) => {
+                    chatInput.value = event.results[0][0].transcript;
+                    handleSendMessage();
+                };
+                recognition.onend = () => micButton.classList.remove('text-red-500');
+                recognition.onerror = (event) => addMessage('system', `Speech recognition error: ${event.error}`);
+            } else {
+                micButton.disabled = true;
+                micButton.title = "Speech recognition not supported.";
+            }
+
+            // --- Local Storage ---
+            const saveChatHistory = () => localStorage.setItem('stellar-chat-history', JSON.stringify(chatHistory));
+            const loadChatHistory = () => {
+                const savedHistory = localStorage.getItem('stellar-chat-history');
+                if (savedHistory) {
+                    chatHistory = JSON.parse(savedHistory);
+                    chatMessages.innerHTML = '';
+                    chatHistory.forEach(item => addMessage(item.sender, item.message, true));
+                }
+            };
+
+            // --- Initialization ---
+            const init = () => {
+                const savedTheme = localStorage.getItem('stellar-theme') || 'light';
+                applyTheme(savedTheme);
+                loadChatHistory();
+                if (chatHistory.length === 0) {
+                    addMessage('stellar', 'Hello, I am Stellar. How can I assist you today? I am now equipped with advanced finance and news capabilities.');
+                }
+                appContainer.classList.add('fade-in');
+                appContainer.style.opacity = 1;
+            };
+
+            init();
+        });
+    </script>
+</body>
+
+</html>
