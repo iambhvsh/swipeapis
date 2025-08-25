@@ -578,13 +578,15 @@
                     }
 
                     updateMessage(messageId, 'Analyzing comparison data...');
-                    let dataForAI = "Here is the real-time stock data. Please provide a detailed comparison in HTML format.\n\n";
+
+                    let dataForAI = "Here is the real-time stock data for the following tickers:\n";
                     successfulResults.forEach(data => {
                         const change = data.price - data.previous_close;
                         dataForAI += `${data.ticker}: Price=${data.price.toFixed(2)}, Change=${change.toFixed(2)}, P/E=${data.pe_ratio?.toFixed(2) || 'N/A'}\n`;
                     });
+                    dataForAI += "\n\nPlease provide a detailed comparison of these stocks in a neatly formatted HTML table. The table should have a row for each metric (e.g., Price, Change, P/E Ratio) and a column for each stock ticker. After the table, add a brief, one-paragraph summary of the key differences.";
 
-                    const aiComparisonResponse = await getStellarResponse("Compare these stocks", dataForAI);
+                    const aiComparisonResponse = await getStellarResponse("Compare these stocks using an HTML table.", dataForAI);
 
                     if (aiComparisonResponse?.parts?.[0]?.text) {
                         let cleanText = aiComparisonResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
