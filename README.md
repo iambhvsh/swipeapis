@@ -53,7 +53,7 @@ GET /finance/{ticker}
 | `fields` | string | All fields | Comma-separated list of specific fields to return |
 | `history_days` | integer | `0` | Number of days of historical data. Deprecated if `start_date` is used. |
 | `start_date` | string | - | Start date for historical data (YYYY-MM-DD). Overrides `history_days`. |
-| `end_date` | string | - | End date for historical data (YYYY-MM-DD). Defaults to today. |
+| `end_date` | string | - | End date for historical data (YYYY-MM-DD). This date is exclusive. Defaults to today. |
 | `interval` | string | `1d` | Data interval: `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1wk`, `1mo` |
 | `include_recommendations` | boolean | `false` | Include analyst recommendations and price targets |
 | `adjusted` | boolean | `true` | Return dividend/split adjusted prices |
@@ -95,6 +95,11 @@ curl "https://swipeapis.vercel.app/finance/MSFT?include_recommendations=true"
 **With a specific date range:**
 ```bash
 curl "https://swipeapis.vercel.app/finance/NVDA?start_date=2024-08-01&end_date=2024-08-20"
+```
+
+**Single day history (note end_date is the next day):**
+```bash
+curl "https://swipeapis.vercel.app/finance/NVDA?start_date=2024-08-20&end_date=2024-08-21"
 ```
 
 ### Response Example
@@ -237,7 +242,7 @@ GET /news/
 | `num_results` | integer | `10` | Number of articles to return (1-100) |
 | `start` | integer | `0` | Starting index for pagination |
 | `from_date` | string | - | Start date filter (YYYY-MM-DD) |
-| `to_date` | string | - | End date filter (YYYY-MM-DD) |
+| `to_date` | string | - | End date filter (YYYY-MM-DD). This date is exclusive. |
 | `language` | string | `en` | Article language (ISO 639-1) |
 | `region` | string | `US` | Geographic region for news |
 | `category` | string | - | News category filter |
@@ -271,9 +276,9 @@ curl "https://swipeapis.vercel.app/news/"
 curl "https://swipeapis.vercel.app/news/?category=technology&include_sentiment=true&num_results=15"
 ```
 
-**Search with date range:**
+**Search for a single day (note to_date is the next day):**
 ```bash
-curl "https://swipeapis.vercel.app/news/?q=artificial+intelligence&from_date=2025-08-01&to_date=2025-08-24"
+curl "https://swipeapis.vercel.app/news/?q=artificial+intelligence&from_date=2025-08-20&to_date=2025-08-21"
 ```
 
 **Regional news in specific language:**
