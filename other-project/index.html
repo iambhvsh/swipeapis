@@ -544,43 +544,55 @@
              const fetchAndDisplayNews = async (content) => {
                 const { params, commentary } = content;
                 lastNewsQuery = params;
-                showTypingIndicator(commentary);
+                const messageId = addMessage('stellar', commentary);
                 try {
                     const data = await fetchNewsAPI(params);
-                    hideTypingIndicator();
                     const newsHtml = formatNewsDataAsHtml(data);
-                    addMessage('stellar', `<p>${commentary}</p>${newsHtml}`, true);
+                    updateMessage(messageId, `<p>${commentary}</p>${newsHtml}`, true);
                 } catch (error) {
-                    hideTypingIndicator();
                     console.error("News fetch error:", error);
-                    addMessage('stellar', `Sorry, I ran into an error trying to get the news: ${error.message}`);
+                    updateMessage(messageId, `Sorry, I ran into an error trying to get the news: ${error.message}`);
                 }
             };
 
             const fetchAndCompareStocks = async (content) => {
                 const { tickers, commentary } = content;
-                showTypingIndicator(commentary);
+                const messageId = addMessage('stellar', commentary);
                 try {
-                    const results = await Promise.all(tickers.map(ticker => fetchStockAPI(ticker)));
-                    showTypingIndicator('Analyzing comparison data...');
+                    // Handle promises individually to prevent one failure from killing the whole process
+                    const promises = tickers.map(ticker => fetchStockAPI(ticker).catch(e => ({error: e, ticker})));
+                    const results = await Promise.all(promises);
+
+                    const successfulResults = results.filter(res => !res.error);
+                    const failedResults = results.filter(res => res.error);
+
+                    if (successfulResults.length === 0) {
+                        updateMessage(messageId, "Sorry, I couldn't retrieve data for any of the requested stocks.");
+                        return;
+                    }
+
+                    updateMessage(messageId, 'Analyzing comparison data...');
                     let dataForAI = "Here is the real-time stock data. Please provide a detailed comparison in HTML format.\n\n";
-                    results.forEach(data => {
+                    successfulResults.forEach(data => {
                         const change = data.price - data.previous_close;
                         dataForAI += `${data.ticker}: Price=${data.price.toFixed(2)}, Change=${change.toFixed(2)}, P/E=${data.pe_ratio?.toFixed(2) || 'N/A'}\n`;
                     });
+
                     const aiComparisonResponse = await getStellarResponse("Compare these stocks", dataForAI);
-                    hideTypingIndicator();
+
                     if (aiComparisonResponse?.parts?.[0]?.text) {
                         let cleanText = aiComparisonResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
                         const parsedJson = JSON.parse(cleanText);
                         let finalHtml = `<p>${parsedJson.content}</p>`;
-                        results.forEach(data => { finalHtml += formatStockDataAsHtml(data); });
-                        addMessage('stellar', finalHtml, true);
+                        successfulResults.forEach(data => { finalHtml += formatStockDataAsHtml(data); });
+                        if (failedResults.length > 0) {
+                            finalHtml += `<p class="text-sm text-red-500 mt-2">Note: I couldn't retrieve data for ${failedResults.map(f => f.ticker).join(', ')}.</p>`;
+                        }
+                        updateMessage(messageId, finalHtml, true);
                     } else { throw new Error("Failed to get comparison from AI."); }
                 } catch (error) {
-                    hideTypingIndicator();
                     console.error("Stock comparison fetch error:", error);
-                    addMessage('stellar', `I couldn't retrieve all data for comparison. Please check the tickers.`);
+                    updateMessage(messageId, `I couldn't retrieve all data for comparison. Please check the tickers.`);
                 }
             };
 
