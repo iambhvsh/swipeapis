@@ -50,23 +50,23 @@ def get_finance_data_service(
     """
     try:
         stock = yf.Ticker(ticker)
-        # .info can be slow as it fetches a lot of data.
-        stock_info = stock.info
-
-        # A simple check for a valid ticker.
-        # For some tickers (e.g. crypto), info is empty but history works.
-        # So, we only raise an error if both info and a history check fail.
-        if not stock_info.get("regularMarketPrice") and history_days == 0:
-            hist_check = stock.history(period="1d")
-            if hist_check.empty:
-                raise TickerNotFoundError(
+        # Fetching history is a more reliable way to check if a ticker is valid.
+        if stock.history(period="5d").empty:
+            # If history is empty, it's very likely an invalid ticker.
+            # We double-check .info as a fallback for certain asset types.
+            if not stock.info or 'symbol' not in stock.info:
+                 raise TickerNotFoundError(
                     f"Ticker '{ticker}' not found or no data available."
                 )
+
+        # .info can be slow as it fetches a lot of data, so we call it only after the initial check.
+        stock_info = stock.info
+
     except Exception as e:
         # This can catch broader network issues or yfinance errors.
         raise YFinanceError(f"Error initializing ticker '{ticker}': {e}")
 
-    response_data = {"ticker": ticker}
+    response_data = {"ticker": stock_info.get('symbol', ticker.upper())}
 
     # Determine which fields to fetch from the .info object
     if fields:
