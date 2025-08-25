@@ -93,15 +93,24 @@ def get_news_service(
                 "source": entry.get('source', {}).get('title'),
                 "published": entry.get('published'),
                 "description": description,
-                "image": None,  # Image URLs are not provided by this library.
+                "image": None,
                 "category": category if q else "top",
+                "language": language,
+                "region": region,
             }
             if include_sentiment:
                 sentiment_text = f"{article['title']}. {description}"
                 article['sentiment'] = sia.polarity_scores(sentiment_text)
             article_list.append(article)
 
-        return {"articles": article_list}
+        return {
+            "query": q or "top_headlines",
+            "total_articles": len(entries),
+            "articles": article_list,
+            "metadata": {
+                "generated_at": datetime.utcnow().isoformat() + "Z",
+            }
+        }
 
     except Exception as e:
         raise NewsFetchingError(f"Error fetching news results: {e}")

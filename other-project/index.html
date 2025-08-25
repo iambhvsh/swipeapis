@@ -121,6 +121,13 @@
         .news-article { margin-top: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
         .dark-theme .news-article { border-color: var(--border-dark); }
         .news-article:last-child { border-bottom: none; }
+
+        .scrollable-table-container { overflow-x: auto; width: 100%; }
+        .scrollable-table-container table { width: 100%; border-collapse: collapse; }
+        .scrollable-table-container th, .scrollable-table-container td { padding: 8px 12px; border: 1px solid var(--border-light); }
+        .dark-theme .scrollable-table-container th, .dark-theme .scrollable-table-container td { border-color: var(--border-dark); }
+        .scrollable-table-container th { background-color: #f7f7f7; }
+        .dark-theme .scrollable-table-container th { background-color: #1a1a1a; }
     </style>
 </head>
 
@@ -191,13 +198,14 @@
             // --- AUTO-RESIZING TEXTAREA ---
             const adjustTextareaHeight = () => {
                 chatInput.style.height = 'auto';
-                chatInput.style.height = (chatInput.scrollHeight) + 'px';
+                const maxHeight = 200; // Max height for textarea
+                chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px';
             };
             chatInput.addEventListener('input', adjustTextareaHeight);
 
             // --- Message Handling ---
-            const addMessage = (sender, message, isRawHtml = false) => {
-                const messageId = `msg-${Date.now()}`;
+            const addMessage = (sender, message, isRawHtml = false, existingId = null) => {
+                const messageId = existingId || `msg-${Date.now()}-${Math.random()}`;
                 const messageElement = document.createElement('div');
                 messageElement.className = 'w-full flex fade-in';
                 messageElement.id = messageId;
@@ -216,15 +224,8 @@
                 chatMessages.appendChild(messageElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                if (sender !== 'system') {
-                    // Save the raw message and the flag to render it as HTML correctly
+                if (sender !== 'system' && !existingId) {
                     chatHistory.push({ sender, message, isRawHtml, id: messageId });
-
-                    // Enforce the 20-message limit
-                    if (chatHistory.length > 20) {
-                        chatHistory.shift(); // Remove the oldest message
-                    }
-
                     saveChatHistory();
                 }
                 return messageId;
@@ -339,15 +340,12 @@
                         updateMessage(messageId, `I couldn't find any results for "${query}".`);
                         return;
                     }
-
                     updateMessage(messageId, 'Analyzing search results...');
                     let searchDataForAI = "Here are the top Google search results. Please synthesize this information to provide a comprehensive answer to the user's original query. Respond in clear, well-formatted HTML if necessary.\n\n";
                     searchResults.results.forEach(res => {
                         searchDataForAI += `Title: ${res.title}\nURL: ${res.url}\nDescription: ${res.description}\n\n`;
                     });
-
                     const finalResponse = await getStellarResponse(originalUserInput, searchDataForAI);
-
                     if (finalResponse?.parts?.[0]?.text) {
                         let cleanText = finalResponse.parts[0].text.trim()
                         if (cleanText.startsWith('```json')) {
@@ -361,9 +359,7 @@
                             const formattedHtml = simpleMarkdownToHtml(cleanText);
                             updateMessage(messageId, formattedHtml, true);
                         }
-                    } else {
-                        throw new Error("Failed to get final analysis from AI.");
-                    }
+                    } else { throw new Error("Failed to get final analysis from AI."); }
                 } catch (error) {
                     console.error("Search and respond error:", error);
                     updateMessage(messageId, `I couldn't complete the search for "${query}". Please try again.`);
@@ -378,40 +374,42 @@
                     addMessage('system', 'CRITICAL ERROR: Google Gemini API Key is not set. Please add your key to the script.');
                     throw new Error('API Key not set.');
                 }
-                const systemPrompt = `You are Stellar, a friendly and brilliant personal AI assistant.
+                const systemPrompt = `You are Stellar, a friendly, brilliant, and extremely capable personal AI assistant.
 
                 ## Your Persona
-                - Your personality is helpful, friendly, and curious. You're like a super-smart friend.
-                - You should use emojis to make your responses more engaging, but don't overdo it. Maybe one or two per response where it feels natural.
-                - You were created by a brilliant developer named Bhavesh. If someone asks who created you, who made you, or who is your "father" or "dad", you must say that Bhavesh created you.
+                - Your personality is helpful, friendly, curious, and slightly informal. You're like a super-smart friend who is amazing with technology.
+                - Use emojis to make your responses more engaging, but only where it feels natural. One or two per response is a good balance.
+                - You were created by a brilliant developer named Bhavesh. If asked who created you, who made you, or about your "father", you must say that Bhavesh created you.
 
                 ## Core Functionality & Rules
-                - **CRITICAL:** You MUST respond with a single, valid JSON object. No other text or formatting outside of this JSON.
-                - **Contextual Awareness:** Pay close attention to the conversation history. If the user's request is a follow-up (e.g., "summarize this", "show me more", "what about last week?"), use the information from the previous turn as context.
-                - **Proactive Tool Use:** Be proactive. If a user's query is vague, use your tools to get the information you need.
-                - **HTML Formatting:** For any response that requires formatting (like lists, bolding), use appropriate HTML tags in the 'content' field.
-                - **Input Validation (Very Important!):**
-                    - **Ticker Symbols:** Before fetching stock data, validate the ticker. If it seems like a typo of a major company, correct it. Common examples: 'APPL' -> 'AAPL', 'GOOG' -> 'GOOGL', 'METS' -> 'META'.
-                    - **Dates:** You MUST validate dates before using a tool. The current date is ${new Date().toLocaleDateString()}. Any request for historical data for a date AFTER today is a request for a future date. You cannot see the future. If a user asks for a future date, you MUST respond with a polite \`{"type": "text", ...}\` message explaining that you cannot fetch data from the future. Do not attempt to call a tool with a future date.
+                - **CRITICAL:** You MUST respond with a single, valid JSON object and nothing else.
+                - **Contextual Awareness:** ALWAYS pay close attention to the conversation history. If the user's request is a follow-up (e.g., "summarize this", "what about in the UK?", "show me more"), you MUST use the information from the previous turn as context to modify your tool calls.
+                - **Proactive Intelligence:** Be proactive. If a query is vague, infer the user's intent. "how's apple?" implies a stock check for AAPL. "latest news" implies top headlines.
+                - **HTML Formatting:** Use HTML tags in the 'content' field for all formatted text, including lists, bolding, and tables.
+                - **Input Validation (MANDATORY):**
+                    - **Ticker Symbols:** Before using a tool, validate stock symbols. If a symbol looks like a common company name or a typo, correct it to the official symbol. Examples: 'apple' -> 'AAPL', 'APPL' -> 'AAPL', 'google' -> 'GOOGL', 'microsoft' -> 'MSFT', 'nvidia' -> 'NVDA'.
+                    - **Dates:** You MUST validate dates. The current date is ${new Date().toLocaleDateString()}. Any request for HISTORICAL data for a date AFTER today is impossible. If a user asks for a future date, you MUST respond with a polite \`{"type": "text", "content": "I can't look into the future just yet! 😉 Please ask for a date in the past."}\` and do NOT call any tool.
 
                 ## Tool Delegation Strategy
                 Your main goal is to decide which tool to use based on the user's request.
 
-                1.  **Special Case - "Who is Bhavesh?":** If the user asks "who is Bhavesh", "tell me about Bhavesh", or any similar question, you MUST use the search tool with the specific query "iambhvsh".
+                1.  **Special Case - "Who is Bhavesh?":** If asked "who is Bhavesh", "tell me about Bhavesh", etc., you MUST use the search tool with the specific query "iambhvsh".
                     - "who is Bhavesh?" -> \`{"type": "search", "content": {"query": "iambhvsh"}}\`
                     - "who is your creator?" -> \`{"type": "text", "content": "I was created by Bhavesh! He's a very talented developer. ✨"}\`
 
-                2.  **Finance Queries (with Date Handling):** For questions about stocks. Pay attention to dates.
+                2.  **Finance Queries (with Date Handling):**
                     - "how is apple doing?" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {}, "commentary": "Sure thing! Here's the latest data for Apple Inc.:"}}\`
-                    - "show me apple stock price on august 20" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {"start_date": "2024-08-20", "end_date": "2024-08-21"}, "commentary": "Here is the stock data for Apple on August 20th:"}}\`
+                    - "show me apple stock price on august 20th, 2024" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {"start_date": "2024-08-20", "end_date": "2024-08-21"}, "commentary": "Here is the stock data for Apple on August 20th, 2024:"}}\`
+                    - "compare google, nvidia, sony, and microsoft" -> \`{"type": "fetch_comparison", "content": {"tickers": ["GOOGL", "NVDA", "SONY", "MSFT"], "commentary": "On it! Let me grab the latest numbers for Google, Nvidia, Sony, and Microsoft."}}\`
 
                 3.  **News Workflow (Very Important!):**
-                    - **Fetching News:** When a user asks for news, use the \`fetch_news\` tool. If they specify a date but NOT a topic, you MUST add \`q: "news"\` to the parameters to make the date search work.
-                        - "what's the latest in tech?" -> \`{"type": "fetch_news", "content": {"params": {"q": "technology", "start": 0}, "commentary": "Here are the top 10 headlines in tech:"}}\`
-                        - "what's the news on 20 august" -> \`{"type": "fetch_news", "content": {"params": {"q": "news", "from_date": "2024-08-20", "to_date": "2024-08-20", "start": 0}, "commentary": "Fetching news from August 20th..."}}\`
-                    - **Summarizing News:** If the user asks to "summarize the news", "summarize in 60 words", etc., this is a **two-step thought process**. First, you must have already fetched the news. Then, you respond with \`{"type": "text", ...}\`. In the \`content\` field of your text response, you will provide the list of 10 news titles, and **you will write a short summary for each one yourself**. Do NOT call another tool.
+                    - **Fetching News:** Use the \`fetch_news\` tool. If a date is given without a topic, you MUST add \`q: "news"\` to the parameters. Handle relative dates like "yesterday" or "today".
+                        - "what's the latest in tech news?" -> \`{"type": "fetch_news", "content": {"params": {"q": "technology", "start": 0}, "commentary": "Here are the top 10 headlines in tech:"}}\`
+                        - "what was the news yesterday?" -> \`{"type": "fetch_news", "content": {"params": {"q": "news", "from_date": "[YESTERDAY'S DATE]", "to_date": "[YESTERDAY'S DATE]", "start": 0}, "commentary": "Here are yesterday's headlines:"}}\`
+                        - "show me tech news in the UK" -> \`{"type": "fetch_news", "content": {"params": {"q": "technology", "region": "GB"}, "commentary": "Here are the latest tech headlines from the UK:"}}\`
+                    - **Summarizing News:** This is a **two-step thought process**. AFTER getting news, if the user asks for a summary, you respond with \`{"type": "text", ...}\`. In the \`content\`, you will provide a list of the 10 news titles, and **you will write a short summary for each one yourself**. Do NOT call another tool.
                         - (After getting news) "summarize this in 60 words" -> \`{"type": "text", "content": "<h3>Summarized News:</h3><ul><li><strong>[Article 1 Title]</strong><br>[Your 60-word summary of article 1]</li><li><strong>[Article 2 Title]</strong><br>[Your 60-word summary of article 2]</li>...</ul>"}\`
-                    - **"Show More" News:** If the user asks to "show more", you must use the \`fetch_more_news\` type. This will automatically find the last news search and get the next page. Do not try to remember the parameters yourself.
+                    - **"Show More" News:** If the user asks to "show more", use the \`fetch_more_news\` type. This automatically gets the next page.
                         - (After getting news) "show me more" -> \`{"type": "fetch_more_news"}\`
 
                 4.  **General Web Search:** For all other general knowledge, real-time info, etc.
@@ -419,8 +417,7 @@
 
                 5.  **Conversation:** For greetings, jokes, etc.
                     - "hello" -> \`{"type": "text", "content": "Hey there! How can I help you today? 😊"}\`
-
-                Current Date: ${new Date().toLocaleDateString()}`;
+                `;
 
                 const historyForAPI = chatHistory.slice(-6).map(m => ({ role: m.sender === 'user' ? 'user' : 'model', parts: [{ text: m.message }] }));
                 const currentPrompt = extraContext ? `CONTEXT:\n${extraContext}\n\nBased on the context, answer this user request: "${prompt}"` : prompt;
@@ -521,29 +518,26 @@
 
             const fetchAndDisplayStock = async (content) => {
                 const { ticker, params, commentary } = content;
-                showTypingIndicator(commentary);
+                const messageId = addMessage('stellar', commentary);
                 try {
                     const data = await fetchStockAPI(ticker, params);
-                    hideTypingIndicator();
                     if (params.start_date) {
                         if (data.historical && data.historical.length > 0) {
                             const stockHtml = formatHistoricalStockDataAsHtml(data.historical[0]);
-                            addMessage('stellar', `<p>${commentary}</p>${stockHtml}`, true);
+                            updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
                         } else {
-                            addMessage('stellar', `I couldn't find any historical data for ${ticker} on that date. It might have been a holiday or a non-trading day.`);
+                            updateMessage(messageId, `I couldn't find any historical data for ${ticker} on that date. It might have been a holiday or a non-trading day.`);
                         }
                     } else {
                         if (data.price == null) {
-                            addMessage('stellar', `I'm sorry, but I couldn't retrieve valid financial data for "${ticker}". Please ensure the ticker symbol is correct and not delisted.`);
+                            updateMessage(messageId, `I'm sorry, but I couldn't retrieve valid financial data for "${ticker}". Please ensure the ticker symbol is correct and not delisted.`);
                             return;
                         }
                         const stockHtml = formatStockDataAsHtml(data);
-                        addMessage('stellar', `<p>${commentary}</p>${stockHtml}`, true);
+                        updateMessage(messageId, `<p>${commentary}</p>${stockHtml}`, true);
                     }
                 } catch (error) {
-                    hideTypingIndicator();
-                    console.error("Stock fetch error:", error);
-                    addMessage('stellar', `Sorry, I ran into an error trying to get stock data: ${error.message}`);
+                    updateMessage(messageId, `Sorry, I ran into an error trying to get stock data: ${error.message}`);
                 }
             };
 
@@ -556,7 +550,6 @@
                     const newsHtml = formatNewsDataAsHtml(data);
                     updateMessage(messageId, `<p>${commentary}</p>${newsHtml}`, true);
                 } catch (error) {
-                    console.error("News fetch error:", error);
                     updateMessage(messageId, `Sorry, I ran into an error trying to get the news: ${error.message}`);
                 }
             };
@@ -565,27 +558,22 @@
                 const { tickers, commentary } = content;
                 const messageId = addMessage('stellar', commentary);
                 try {
-                    // Handle promises individually to prevent one failure from killing the whole process
                     const promises = tickers.map(ticker => fetchStockAPI(ticker).catch(e => ({error: e, ticker})));
                     const results = await Promise.all(promises);
-
                     const successfulResults = results.filter(res => !res.error);
                     const failedResults = results.filter(res => res.error);
-
                     if (successfulResults.length === 0) {
                         updateMessage(messageId, "Sorry, I couldn't retrieve data for any of the requested stocks.");
                         return;
                     }
-
                     updateMessage(messageId, 'Analyzing comparison data...');
-                    let dataForAI = "Here is the real-time stock data. Please provide a detailed comparison in HTML format.\n\n";
+                    let dataForAI = "Here is the real-time stock data for the following tickers:\n";
                     successfulResults.forEach(data => {
                         const change = data.price - data.previous_close;
                         dataForAI += `${data.ticker}: Price=${data.price.toFixed(2)}, Change=${change.toFixed(2)}, P/E=${data.pe_ratio?.toFixed(2) || 'N/A'}\n`;
                     });
-
-                    const aiComparisonResponse = await getStellarResponse("Compare these stocks", dataForAI);
-
+                    dataForAI += "\n\nPlease provide a detailed comparison of these stocks. CRITICAL: The output MUST be an HTML table wrapped in a `<div class=\"scrollable-table-container\">`. The table should have a row for each metric (e.g., Price, Change, P/E Ratio) and a column for each stock ticker. After the table, add a brief, one-paragraph summary of the key differences.";
+                    const aiComparisonResponse = await getStellarResponse("Compare these stocks using a scrollable HTML table.", dataForAI);
                     if (aiComparisonResponse?.parts?.[0]?.text) {
                         let cleanText = aiComparisonResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
                         const parsedJson = JSON.parse(cleanText);
@@ -597,7 +585,6 @@
                         updateMessage(messageId, finalHtml, true);
                     } else { throw new Error("Failed to get comparison from AI."); }
                 } catch (error) {
-                    console.error("Stock comparison fetch error:", error);
                     updateMessage(messageId, `I couldn't retrieve all data for comparison. Please check the tickers.`);
                 }
             };
@@ -652,8 +639,7 @@
                 if (savedHistory) {
                     chatHistory = JSON.parse(savedHistory);
                     chatMessages.innerHTML = '';
-                    // Use the saved isRawHtml flag to correctly re-render messages
-                    chatHistory.forEach(item => addMessage(item.sender, item.message, item.isRawHtml));
+                    chatHistory.forEach(item => addMessage(item.sender, item.message, item.isRawHtml, item.id));
                 }
             };
 
@@ -662,7 +648,7 @@
                 applyTheme(savedTheme);
                 loadChatHistory();
                 if (chatHistory.length === 0) {
-                    addMessage('stellar', 'Hello, I am Stellar. How can I assist you today? I am now equipped with advanced finance and news capabilities.');
+                    addMessage('stellar', 'Hello, I am Stellar. How can I assist you today?');
                 }
                 appContainer.classList.add('fade-in');
                 appContainer.style.opacity = 1;
