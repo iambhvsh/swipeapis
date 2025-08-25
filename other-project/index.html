@@ -121,6 +121,28 @@
         .news-article { margin-top: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
         .dark-theme .news-article { border-color: var(--border-dark); }
         .news-article:last-child { border-bottom: none; }
+
+        .scrollable-table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .scrollable-table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .scrollable-table-container th, .scrollable-table-container td {
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+        }
+        .dark-theme .scrollable-table-container th, .dark-theme .scrollable-table-container td {
+            border-color: var(--border-dark);
+        }
+        .scrollable-table-container th {
+            background-color: #f7f7f7;
+        }
+        .dark-theme .scrollable-table-container th {
+            background-color: #1a1a1a;
+        }
     </style>
 </head>
 
@@ -196,8 +218,8 @@
             chatInput.addEventListener('input', adjustTextareaHeight);
 
             // --- Message Handling ---
-            const addMessage = (sender, message, isRawHtml = false) => {
-                const messageId = `msg-${Date.now()}`;
+            const addMessage = (sender, message, isRawHtml = false, existingId = null) => {
+                const messageId = existingId || `msg-${Date.now()}-${Math.random()}`; // Use existing ID or create a more unique new one
                 const messageElement = document.createElement('div');
                 messageElement.className = 'w-full flex fade-in';
                 messageElement.id = messageId;
@@ -216,15 +238,8 @@
                 chatMessages.appendChild(messageElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                if (sender !== 'system') {
-                    // Save the raw message and the flag to render it as HTML correctly
+                if (sender !== 'system' && !existingId) { // Only add to history if it's a new message
                     chatHistory.push({ sender, message, isRawHtml, id: messageId });
-
-                    // Enforce the 20-message limit
-                    if (chatHistory.length > 20) {
-                        chatHistory.shift(); // Remove the oldest message
-                    }
-
                     saveChatHistory();
                 }
                 return messageId;
@@ -404,6 +419,7 @@
                 2.  **Finance Queries (with Date Handling):** For questions about stocks. Pay attention to dates.
                     - "how is apple doing?" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {}, "commentary": "Sure thing! Here's the latest data for Apple Inc.:"}}\`
                     - "show me apple stock price on august 20" -> \`{"type": "fetch_stock", "content": {"ticker": "AAPL", "params": {"start_date": "2024-08-20", "end_date": "2024-08-21"}, "commentary": "Here is the stock data for Apple on August 20th:"}}\`
+                    - "compare google, nvidia, and microsoft" -> \`{"type": "fetch_comparison", "content": {"tickers": ["GOOGL", "NVDA", "MSFT"], "commentary": "Let me grab the latest numbers for Google, Nvidia, and Microsoft for you."}}\`
 
                 3.  **News Workflow (Very Important!):**
                     - **Fetching News:** When a user asks for news, use the \`fetch_news\` tool. If they specify a date but NOT a topic, you MUST add \`q: "news"\` to the parameters to make the date search work.
@@ -584,9 +600,9 @@
                         const change = data.price - data.previous_close;
                         dataForAI += `${data.ticker}: Price=${data.price.toFixed(2)}, Change=${change.toFixed(2)}, P/E=${data.pe_ratio?.toFixed(2) || 'N/A'}\n`;
                     });
-                    dataForAI += "\n\nPlease provide a detailed comparison of these stocks in a neatly formatted HTML table. The table should have a row for each metric (e.g., Price, Change, P/E Ratio) and a column for each stock ticker. After the table, add a brief, one-paragraph summary of the key differences.";
+                    dataForAI += "\n\nPlease provide a detailed comparison of these stocks. CRITICAL: The output MUST be an HTML table wrapped in a `<div class=\"scrollable-table-container\">`. The table should have a row for each metric (e.g., Price, Change, P/E Ratio) and a column for each stock ticker. After the table, add a brief, one-paragraph summary of the key differences.";
 
-                    const aiComparisonResponse = await getStellarResponse("Compare these stocks using an HTML table.", dataForAI);
+                    const aiComparisonResponse = await getStellarResponse("Compare these stocks using a scrollable HTML table.", dataForAI);
 
                     if (aiComparisonResponse?.parts?.[0]?.text) {
                         let cleanText = aiComparisonResponse.parts[0].text.trim().replace(/^```json\s*|```$/g, '');
@@ -654,8 +670,8 @@
                 if (savedHistory) {
                     chatHistory = JSON.parse(savedHistory);
                     chatMessages.innerHTML = '';
-                    // Use the saved isRawHtml flag to correctly re-render messages
-                    chatHistory.forEach(item => addMessage(item.sender, item.message, item.isRawHtml));
+                    // Pass the existing ID to prevent re-generation and re-saving
+                    chatHistory.forEach(item => addMessage(item.sender, item.message, item.isRawHtml, item.id));
                 }
             };
 
