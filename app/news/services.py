@@ -82,7 +82,7 @@ def get_news_service(
         entries = search_result.get('entries', [])
 
         # Paginate the results
-        paginated_entries = search_result.entries[start : start + num_results]
+        paginated_entries = entries[start : start + num_results]
 
         article_list = []
         for entry in paginated_entries:
