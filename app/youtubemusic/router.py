@@ -105,7 +105,7 @@ async def get_lyrics(video_id: str):
         )
 
 
-@router.get("/charts", response_model=Dict[str, Any])
+@router.get("/charts", response_model=List[Dict[str, Any]])
 async def get_charts():
     """
     Gets the top charts from YouTube Music.

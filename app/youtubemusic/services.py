@@ -86,6 +86,10 @@ def get_charts_service() -> Dict[str, Any]:
     try:
         ytmusic = YTMusic()
         charts = ytmusic.get_charts()
-        return charts
+        if charts and 'videos' in charts and charts['videos']:
+            top_videos_playlist_id = charts['videos'][0]['playlistId']
+            playlist = ytmusic.get_playlist(top_videos_playlist_id)
+            return playlist['tracks']
+        return []
     except Exception as e:
         raise YouTubeMusicSearchError(f"Error fetching charts: {e}")
