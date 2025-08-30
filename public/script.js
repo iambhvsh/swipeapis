@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('YouTube Music App Initialized');
 
     const mainContent = document.getElementById('main-content');
-    const API_BASE_URL = 'http://localhost:8000';
+    const API_BASE_URL = 'https://swipeapis.vercel.app';
 
     async function fetchCharts() {
         try {
@@ -24,22 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let html = '<h1>Top Charts</h1><div class="charts-grid">';
+        let html = '<h1>Listen Now</h1>';
 
         if(charts.videos && charts.videos.items) {
-            html += '<h2>Top Videos</h2>';
+            html += '<div class="charts-grid">';
             charts.videos.items.forEach(item => {
                 html += `
                     <a href="#song/${item.videoId}" class="chart-item">
-                        <img src="${item.thumbnails[0].url}" alt="${item.title}">
+                        <img src="${item.thumbnails.pop().url}" alt="${item.title}">
                         <h3>${item.title}</h3>
                         <p>${item.artists.map(a => a.name).join(', ')}</p>
                     </a>
                 `;
             });
+            html += '</div>';
         }
 
-        html += '</div>';
         mainContent.innerHTML = html;
     }
 
@@ -78,27 +78,54 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let html = '<h1>Search Results</h1><div class="search-results-grid">';
+        const songs = results.filter(item => item.resultType === 'song');
+        const albums = results.filter(item => item.resultType === 'album');
+        const artists = results.filter(item => item.resultType === 'artist');
 
-        results.forEach(item => {
-            let link = '#';
-            if (item.resultType === 'song') {
-                link = `#song/${item.videoId}`;
-            } else if (item.resultType === 'album') {
-                link = `#album/${item.browseId}`;
-            } else if (item.resultType === 'artist') {
-                link = `#artist/${item.browseId}`;
-            }
-            html += `
-                <a href="${link}" class="search-result-item">
-                    <img src="${item.thumbnails[0].url}" alt="${item.title}">
-                    <h3>${item.title}</h3>
-                    <p>${item.artists ? item.artists.map(a => a.name).join(', ') : item.resultType}</p>
-                </a>
-            `;
-        });
+        let html = '<h1>Search Results</h1>';
 
-        html += '</div>';
+        if (songs.length > 0) {
+            html += '<h2>Songs</h2><div class="charts-grid">';
+            songs.forEach(item => {
+                html += `
+                    <a href="#song/${item.videoId}" class="chart-item">
+                        <img src="${item.thumbnails.pop().url}" alt="${item.title}">
+                        <h3>${item.title}</h3>
+                        <p>${item.artists.map(a => a.name).join(', ')}</p>
+                    </a>
+                `;
+            });
+            html += '</div>';
+        }
+
+        if (albums.length > 0) {
+            html += '<h2>Albums</h2><div class="charts-grid">';
+            albums.forEach(item => {
+                html += `
+                    <a href="#album/${item.browseId}" class="chart-item">
+                        <img src="${item.thumbnails.pop().url}" alt="${item.title}">
+                        <h3>${item.title}</h3>
+                        <p>${item.artists.map(a => a.name).join(', ')}</p>
+                    </a>
+                `;
+            });
+            html += '</div>';
+        }
+
+        if (artists.length > 0) {
+            html += '<h2>Artists</h2><div class="charts-grid">';
+            artists.forEach(item => {
+                html += `
+                    <a href="#artist/${item.browseId}" class="chart-item">
+                        <img src="${item.thumbnails.pop().url}" alt="${item.title}">
+                        <h3>${item.title}</h3>
+                        <p>Artist</p>
+                    </a>
+                `;
+            });
+            html += '</div>';
+        }
+
         mainContent.innerHTML = html;
     }
 
@@ -177,14 +204,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (audioSource) {
             audioPlayer.src = audioSource.url;
             audioPlayer.play();
+            playPauseButton.textContent = '⏸️';
         }
+
+        const backgroundArt = song.videoDetails.thumbnail.thumbnails.pop().url;
+        mainContent.style.backgroundImage = `url(${backgroundArt})`;
+
+        document.getElementById('footer-thumb').src = backgroundArt;
+        document.getElementById('footer-title').textContent = song.videoDetails.title;
+        document.getElementById('footer-artist').textContent = song.videoDetails.author;
 
 
         let html = `
-            <div class="song-details">
-                <img src="${song.videoDetails.thumbnail.thumbnails.pop().url}" alt="${song.videoDetails.title}">
-                <h1>${song.videoDetails.title}</h1>
-                <h2>${song.videoDetails.author}</h2>
+            <div class="song-details-container">
+                <div class="song-details">
+                    <img src="${backgroundArt}" alt="${song.videoDetails.title}">
+                    <h1>${song.videoDetails.title}</h1>
+                    <h2>${song.videoDetails.author}</h2>
+                </div>
             </div>
         `;
         mainContent.innerHTML = html;
@@ -210,16 +247,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const backgroundArt = album.thumbnails.pop().url;
+        mainContent.style.backgroundImage = `url(${backgroundArt})`;
+
         let html = `
-            <div class="album-details">
-                <img src="${album.thumbnails.pop().url}" alt="${album.title}">
-                <h1>${album.title}</h1>
-                <h2>${album.artists.map(a => a.name).join(', ')}</h2>
+            <div class="album-details-container">
+                <div class="album-header">
+                    <img src="${backgroundArt}" alt="${album.title}">
+                    <div class="album-info">
+                        <h1>${album.title}</h1>
+                        <h2>${album.artists.map(a => a.name).join(', ')}</h2>
+                        <p>${album.year} · ${album.trackCount} songs</p>
+                    </div>
+                </div>
                 <div class="track-list">
                     ${album.tracks.map(track => `
                         <a href="#song/${track.videoId}" class="track-item">
-                            <p>${track.title}</p>
-                            <p>${track.duration}</p>
+                            <p class="track-number">${track.trackNumber}</p>
+                            <p class="track-title">${track.title}</p>
+                            <p class="track-duration">${track.duration}</p>
                         </a>
                     `).join('')}
                 </div>
@@ -248,11 +294,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const backgroundArt = artist.thumbnails.pop().url;
+        mainContent.style.backgroundImage = `url(${backgroundArt})`;
+
         let html = `
-            <div class="artist-details">
-                <img src="${artist.thumbnails.pop().url}" alt="${artist.name}">
-                <h1>${artist.name}</h1>
-                <p>${artist.description}</p>
+            <div class="artist-details-container">
+                <div class="artist-header">
+                    <img src="${backgroundArt}" alt="${artist.name}">
+                    <h1>${artist.name}</h1>
+                </div>
+                <div class="artist-section">
+                    <h2>Top Songs</h2>
+                    <div class="track-list">
+                        ${artist.songs.results.map(track => `
+                            <a href="#song/${track.videoId}" class="track-item">
+                                <img src="${track.thumbnails.pop().url}" class="track-thumbnail">
+                                <p class="track-title">${track.title}</p>
+                                <p class="track-duration">${track.duration}</p>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
         `;
         mainContent.innerHTML = html;
