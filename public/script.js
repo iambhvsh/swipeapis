@@ -18,17 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderCharts(charts) {
-        if (!charts) {
+    function renderCharts(tracks) {
+        if (!tracks) {
             mainContent.innerHTML = '<h1>Error loading charts</h1>';
             return;
         }
 
         let html = '<h1>Listen Now</h1>';
 
-        if(charts.videos && charts.videos.items) {
+        if(tracks.length > 0) {
             html += '<div class="charts-grid">';
-            charts.videos.items.forEach(item => {
+            tracks.forEach(item => {
                 html += `
                     <a href="#song/${item.videoId}" class="chart-item">
                         <img src="${item.thumbnails.pop().url}" alt="${item.title}">
