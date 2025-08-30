@@ -5,4 +5,3 @@ googlesearch-python
 pygooglenews
 vaderSentiment
 markdown2
-ytmusicapi
