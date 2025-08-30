@@ -6,6 +6,7 @@ import markdown2
 from app.finance.router import router as finance_router
 from app.search.router import router as search_router
 from app.news.router import router as news_router
+from app.youtubemusic.router import router as youtubemusic_router
 
 # Disable default docs
 app = FastAPI(
@@ -29,6 +30,7 @@ app.add_middleware(
 app.include_router(finance_router, prefix="/finance", tags=["Finance"])
 app.include_router(search_router, prefix="/search", tags=["Search"])
 app.include_router(news_router, prefix="/news", tags=["News"])
+app.include_router(youtubemusic_router, prefix="/youtubemusic", tags=["YouTube Music"])
 
 
 @app.get("/", response_class=HTMLResponse, tags=["Root"])

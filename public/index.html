@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#home" class="logo">YT Music</a>
+            <div class="search-container">
+                <input type="search" id="search-input" placeholder="Search...">
+                <button id="search-button">Search</button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#charts">Charts</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <!-- Content will be loaded here dynamically -->
+    </main>
+
+    <footer>
+        <div class="player-container">
+            <audio id="audio-player"></audio>
+            <div class="player-controls">
+                <button id="prev-button">⏮</button>
+                <button id="play-pause-button">▶️</button>
+                <button id="next-button">⏭</button>
+                <input type="range" id="progress-bar" value="0">
+                <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
