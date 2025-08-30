@@ -27,12 +27,23 @@
 
     <footer>
         <div class="player-container">
+            <div class="song-info-footer">
+                <img id="footer-thumb" src="">
+                <div class="footer-song-details">
+                    <p id="footer-title"></p>
+                    <p id="footer-artist"></p>
+                </div>
+            </div>
             <audio id="audio-player"></audio>
             <div class="player-controls">
-                <button id="prev-button">⏮</button>
-                <button id="play-pause-button">▶️</button>
-                <button id="next-button">⏭</button>
+                <div class="player-buttons">
+                    <button id="prev-button">⏮</button>
+                    <button id="play-pause-button">▶️</button>
+                    <button id="next-button">⏭</button>
+                </div>
                 <input type="range" id="progress-bar" value="0">
+            </div>
+            <div class="volume-container">
                 <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
             </div>
         </div>
