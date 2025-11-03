@@ -87,7 +87,9 @@ def google_search_service(
         response_list = []
         
         # Apply pagination by slicing the results
-        # This handles the offset (start) and limit (num_results)
+        # Note: DDGS doesn't support server-side offset, so we fetch (start + num_results) items
+        # and then slice to get the items from index 'start' to 'start + num_results'
+        # Example: start=10, num_results=5 -> fetch 15 items, return items [10:15]
         results_to_process = search_results[start:start + num_results]
         
         for i, result in enumerate(results_to_process):
