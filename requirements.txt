@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 yfinance
-googlesearch-python
+ddgs
 pygooglenews
 vaderSentiment
 markdown2

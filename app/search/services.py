@@ -1,10 +1,10 @@
-from googlesearch import search as google_search_lib, SearchResult
+from ddgs import DDGS
 from typing import List, Dict, Any, Optional
 import urllib.parse
 
 
 class SearchError(Exception):
-    """Custom exception for errors during a Google search."""
+    """Custom exception for errors during a search."""
     pass
 
 
@@ -26,28 +26,12 @@ def google_search_service(
     fields: Optional[str]
 ) -> List[Dict[str, Any]]:
     """
-    Main service to perform a Google search, returning rich results.
+    Main service to perform a web search using DDGS (metasearch), returning rich results.
     """
     if not q:
         raise EmptyQueryError("Search query cannot be empty.")
 
     try:
-        # The googlesearch-python library is a generator-based scraper.
-        # We pass advanced=True to get SearchResult objects instead of just URLs.
-        try:
-            results_generator = google_search_lib(
-                q,
-                num_results=num_results,
-                lang=language,
-                start_num=start,
-                safe='active' if safe else 'off',
-                sleep_interval=2.0,  # A short pause to avoid being rate-limited.
-                advanced=True
-            )
-        except Exception as e:
-            # If the scraping library itself fails, raise a specific error.
-            raise SearchError(f"The underlying search library failed: {e}")
-
         # Determine which fields to return based on the 'fields' parameter.
         if fields:
             requested_fields = {field.strip() for field in fields.split(",")}
@@ -61,17 +45,66 @@ def google_search_service(
             # If no fields are specified, default to all available fields.
             requested_fields = set(ALL_FIELDS)
 
-        response_list = []
-        for i, result in enumerate(results_generator):
-            # The library should yield SearchResult objects with advanced=True.
-            if not isinstance(result, SearchResult):
-                continue
+        # Use DDGS (metasearch) with appropriate parameters
+        try:
+            # Map language to region code
+            region_map = {
+                'en': 'us-en',
+                'es': 'es-es',
+                'fr': 'fr-fr',
+                'de': 'de-de',
+                'ja': 'jp-jp',
+                'zh': 'cn-zh',
+                'ru': 'ru-ru',
+                'pt': 'br-pt',
+                'it': 'it-it'
+            }
+            region = region_map.get(language, 'us-en')
+            
+            # Map safe parameter to safesearch level
+            safesearch = 'moderate' if safe else 'off'
+            
+            # Calculate page number and results per page
+            # start is the offset, so we need to calculate which page that represents
+            # DDGS uses 1-based page numbering
+            page = (start // num_results) + 1 if num_results > 0 else 1
+            
+            # Total results to fetch (to handle offset within page)
+            total_results = start + num_results
+            
+            # Perform the search
+            ddgs = DDGS()
+            search_results = ddgs.text(
+                query=q,
+                region=region,
+                safesearch=safesearch,
+                max_results=total_results,
+                page=1,  # Always get from page 1 and slice locally
+                backend="auto"
+            )
+            
+        except Exception as e:
+            # If the search library itself fails, raise a specific error.
+            raise SearchError(f"The underlying search library failed: {e}")
 
+        # Process and filter results
+        response_list = []
+        
+        # Skip the first 'start' results for pagination
+        results_to_process = search_results[start:start + num_results] if start < len(search_results) else []
+        
+        for i, result in enumerate(results_to_process):
+            # DDGS returns dict with keys that vary by backend
+            # Common keys: href, title, body/description
+            url = result.get('href', result.get('url', ''))
+            title = result.get('title', '')
+            description = result.get('body', result.get('description', ''))
+            
             full_data = {
-                "url": result.url,
-                "title": result.title,
-                "description": result.description,
-                "source": urllib.parse.urlparse(result.url).netloc,
+                "url": url,
+                "title": title,
+                "description": description,
+                "source": urllib.parse.urlparse(url).netloc if url else '',
                 "rank": start + i + 1
             }
 
