@@ -64,9 +64,7 @@ def google_search_service(
             # Map safe parameter to safesearch level
             safesearch = 'moderate' if safe else 'off'
             
-            # DDGS returns up to max_results items in a single list
             # To handle pagination with start offset, we need to fetch start + num_results
-            # This is the standard approach for offset-based pagination with this library
             max_results_to_fetch = start + num_results
             
             # Perform the search
@@ -87,14 +85,10 @@ def google_search_service(
         response_list = []
         
         # Apply pagination by slicing the results
-        # Note: DDGS doesn't support server-side offset, so we fetch (start + num_results) items
-        # and then slice to get the items from index 'start' to 'start + num_results'
-        # Example: start=10, num_results=5 -> fetch 15 items, return items [10:15]
         results_to_process = search_results[start:start + num_results]
         
         for i, result in enumerate(results_to_process):
             # DDGS returns dict with keys that vary by backend
-            # Common keys: href, title, body/description
             url = result.get('href', result.get('url', ''))
             title = result.get('title', '')
             description = result.get('body', result.get('description', ''))
