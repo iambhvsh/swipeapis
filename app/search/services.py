@@ -16,7 +16,7 @@ class EmptyQueryError(Exception):
 ALL_FIELDS = ["url", "title", "description", "source", "rank"]
 
 
-def google_search_service(
+def search_service(
     q: str,
     num_results: int,
     start: int,
@@ -26,7 +26,7 @@ def google_search_service(
     fields: Optional[str]
 ) -> List[Dict[str, Any]]:
     """
-    Main service to perform a web search using DDGS (metasearch), returning rich results.
+    Main service to perform a web search using DDGS (Bing), returning rich results.
     """
     if not q:
         raise EmptyQueryError("Search query cannot be empty.")
@@ -45,7 +45,7 @@ def google_search_service(
             # If no fields are specified, default to all available fields.
             requested_fields = set(ALL_FIELDS)
 
-        # Use DDGS (metasearch) with appropriate parameters
+        # Use DDGS with appropriate parameters
         try:
             # Map language to region code
             region_map = {
@@ -64,18 +64,44 @@ def google_search_service(
             # Map safe parameter to safesearch level
             safesearch = 'moderate' if safe else 'off'
             
-            # To handle pagination with start offset, we need to fetch start + num_results
-            max_results_to_fetch = start + num_results
+            # Pagination logic assuming 10 results per page (standard for most backends including Bing)
+            page_size = 10
+            start_page = (start // page_size) + 1
+
+            # Calculate how many results we need relative to the start of the start_page
+            # The offset of start_page relative to global index 0 is (start_page - 1) * page_size
+            global_offset = (start_page - 1) * page_size
+            relative_start_index = start - global_offset
+
+            # We need to fetch enough pages to cover 'relative_start_index + num_results'
+            # But we can just fetch pages sequentially until we have enough data
             
-            # Perform the search
             ddgs = DDGS()
-            search_results = ddgs.text(
-                query=q,
-                region=region,
-                safesearch=safesearch,
-                max_results=max_results_to_fetch,
-                backend="auto"
-            )
+            page_results_list = []
+            current_page = start_page
+
+            # Fetch pages until we have enough results
+            while len(page_results_list) < relative_start_index + num_results:
+                page_data = ddgs.text(
+                    query=q,
+                    region=region,
+                    safesearch=safesearch,
+                    page=current_page,
+                    backend="bing"
+                )
+
+                if not page_data:
+                    break
+
+                page_results_list.extend(page_data)
+                current_page += 1
+
+                # Safety break to avoid infinite loops
+                if current_page > start_page + 10:
+                    break
+
+            # Extract the slice we need
+            results_to_process = page_results_list[relative_start_index : relative_start_index + num_results]
             
         except Exception as e:
             # If the search library itself fails, raise a specific error.
@@ -84,11 +110,8 @@ def google_search_service(
         # Process and filter results
         response_list = []
         
-        # Apply pagination by slicing the results
-        results_to_process = search_results[start:start + num_results]
-        
         for i, result in enumerate(results_to_process):
-            # DDGS returns dict with keys that vary by backend
+            # DDGS returns dict with keys that vary by backend, but DuckDuckGo uses 'href', 'title', 'body'
             url = result.get('href', result.get('url', ''))
             title = result.get('title', '')
             description = result.get('body', result.get('description', ''))

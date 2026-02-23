@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Dict, Any, Optional
-from .services import google_search_service, SearchError, EmptyQueryError, \
+from .services import search_service, SearchError, EmptyQueryError, \
     ALL_FIELDS
 
 router = APIRouter()
@@ -19,7 +19,7 @@ async def perform_search(
         "en", description="The language to use for the search (e.g., 'en', 'es')."
     ),
     safe: bool = Query(
-        True, description="Set to false to disable Google's SafeSearch."
+        True, description="Set to false to disable SafeSearch."
     ),
     include_rank: bool = Query(
         False, description="Set to true to include the search result rank."
@@ -32,12 +32,12 @@ async def perform_search(
     )
 ):
     """
-    Performs a Google search and returns a list of results.
+    Performs a web search using Bing (via DDGS) and returns a list of results.
 
     This endpoint provides the URL, title, and description for each result.
     """
     try:
-        results = google_search_service(
+        results = search_service(
             q=q,
             num_results=num_results,
             start=start,
