@@ -11,7 +11,7 @@ Welcome to Swipe APIs - your comprehensive solution for financial data, web sear
 Swipe APIs provides three powerful endpoints designed for production use:
 
 - **📈 Finance API** - Real-time stock data, historical prices, and market analytics
-- **🔍 Search API** - Bing-powered search with customizable parameters
+- **🔍 Search API** - Multi-engine search (Google, Bing, DuckDuckGo, etc.) for maximum reliability
 - **📰 News API** - Global news aggregation with sentiment analysis
 
 ### Base URL
@@ -136,7 +136,7 @@ curl "https://swipeapis.vercel.app/finance/NVDA?start_date=2024-08-20&end_date=2
 
 ## 🔍 Search API
 
-Bing-powered search engine with advanced filtering and pagination capabilities.
+Aggregated search engine powered by multiple providers (Google, Bing, DuckDuckGo, etc.) for high reliability and comprehensive results.
 
 ### Endpoint
 ```http
@@ -144,7 +144,7 @@ GET /search/
 ```
 
 ### Features
-- ✅ Bing search results with high relevancy
+- ✅ Aggregated search results from multiple top-tier providers
 - ✅ Advanced filtering and pagination
 - ✅ Multi-language support (50+ languages)
 - ✅ SafeSearch controls
