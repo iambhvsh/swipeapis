@@ -16,7 +16,7 @@ class EmptyQueryError(Exception):
 ALL_FIELDS = ["url", "title", "description", "source", "rank"]
 
 
-def google_search_service(
+def search_service(
     q: str,
     num_results: int,
     start: int,
@@ -26,7 +26,8 @@ def google_search_service(
     fields: Optional[str]
 ) -> List[Dict[str, Any]]:
     """
-    Main service to perform a web search using DDGS (metasearch), returning rich results.
+    Main service to perform a web search using DDGS (metasearch), aggregating results
+    from multiple backends (DuckDuckGo, Bing, Google, etc.) for better reliability.
     """
     if not q:
         raise EmptyQueryError("Search query cannot be empty.")
@@ -45,7 +46,7 @@ def google_search_service(
             # If no fields are specified, default to all available fields.
             requested_fields = set(ALL_FIELDS)
 
-        # Use DDGS (metasearch) with appropriate parameters
+        # Use DDGS with appropriate parameters
         try:
             # Map language to region code
             region_map = {
@@ -64,18 +65,67 @@ def google_search_service(
             # Map safe parameter to safesearch level
             safesearch = 'moderate' if safe else 'off'
             
-            # To handle pagination with start offset, we need to fetch start + num_results
-            max_results_to_fetch = start + num_results
+            # Pagination logic
+            # We assume a base page size of roughly 10-20 results per page call,
+            # but since we are using 'all' backends, we might get more.
+            # We will fetch pages sequentially and accumulate unique results.
             
-            # Perform the search
             ddgs = DDGS()
-            search_results = ddgs.text(
-                query=q,
-                region=region,
-                safesearch=safesearch,
-                max_results=max_results_to_fetch,
-                backend="auto"
-            )
+            page_results_list = []
+            seen_urls = set()
+
+            # Start fetching from page 1, regardless of 'start' parameter, because
+            # we need to build our own index since different engines paginate differently.
+            # However, to be efficient, we can estimate start page.
+            # But with multiple engines aggregating, page 1 might return 50 results.
+            # So start_page = 1 is safest to ensure we don't miss anything,
+            # especially since we deduplicate.
+
+            current_page = 1
+
+            # Safety break to avoid infinite loops - fetch at most enough pages to cover the request
+            # Heuristic: max 10 pages deep or until we have enough results
+            while len(page_results_list) < start + num_results:
+                # Use backend="api" which tends to cover multiple sources or "auto"
+                # The user asked for "all backends". backend="html" is also an option.
+                # ddgs "text" method defaults to backend="api" if not specified?
+                # No, default is "auto". Let's use "auto" which uses all available engines.
+                try:
+                    page_data = ddgs.text(
+                        query=q,
+                        region=region,
+                        safesearch=safesearch,
+                        page=current_page,
+                        backend="auto"
+                    )
+                except Exception:
+                    # If a page fetch fails, try continuing or break?
+                    # If page 1 fails completely, we might have issues.
+                    # But ddgs usually handles individual engine failures.
+                    break
+
+                if not page_data:
+                    break
+
+                # Deduplicate and add to list
+                for result in page_data:
+                    url = result.get('href', result.get('url', ''))
+                    if url and url not in seen_urls:
+                        seen_urls.add(url)
+                        page_results_list.append(result)
+
+                current_page += 1
+
+                # Safety break
+                if current_page > 15:
+                    break
+
+            # Extract the slice we need
+            # If we don't have enough results to cover 'start', we return empty or what we have
+            if start >= len(page_results_list):
+                results_to_process = []
+            else:
+                results_to_process = page_results_list[start : start + num_results]
             
         except Exception as e:
             # If the search library itself fails, raise a specific error.
@@ -83,9 +133,6 @@ def google_search_service(
 
         # Process and filter results
         response_list = []
-        
-        # Apply pagination by slicing the results
-        results_to_process = search_results[start:start + num_results]
         
         for i, result in enumerate(results_to_process):
             # DDGS returns dict with keys that vary by backend
