@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException, Query, Path
+from fastapi import APIRouter, HTTPException, Query, Path, Request
 from typing import Optional
 from .services import get_finance_data_service, TickerNotFoundError, \
     YFinanceError
+from app.limiter import limiter
 
 router = APIRouter()
 
 
 @router.get("/{ticker}", response_model=dict)
+@limiter.limit("60/minute")
 async def get_finance_data(
+    request: Request,
     ticker: str = Path(..., description="The stock ticker symbol (e.g., AAPL, GOOGL)."),
     fields: Optional[str] = Query(
         None,
