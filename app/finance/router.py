@@ -1,8 +1,11 @@
+import logging
 from fastapi import APIRouter, HTTPException, Query, Path, Request
 from typing import Optional
 from .services import get_finance_data_service, TickerNotFoundError, \
     YFinanceError
 from app.limiter import limiter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -44,6 +47,7 @@ async def get_finance_data(
     This endpoint provides real-time data fields, historical price data,
     and analyst recommendations.
     """
+    logger.info(f"Fetching finance data for ticker: {ticker}")
     try:
         data = get_finance_data_service(
             ticker=ticker,
@@ -57,10 +61,13 @@ async def get_finance_data(
         )
         return data
     except TickerNotFoundError as e:
+        logger.warning(f"Ticker not found: {ticker} - {e}")
         raise HTTPException(status_code=404, detail=str(e))
     except YFinanceError as e:
+        logger.error(f"YFinance error for ticker {ticker}: {e}")
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
+        logger.error(f"Unexpected error for ticker {ticker}: {e}", exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"An unexpected error occurred: {e}"
         )

@@ -1,8 +1,11 @@
+import logging
 from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
 from .services import get_news_service, InvalidDateFormatError, \
     NewsFetchingError
 from app.limiter import limiter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -54,6 +57,7 @@ async def get_news(
     You can either provide a search query `q` to find specific articles,
     or leave it empty to get the current top headlines.
     """
+    logger.info(f"Fetching news. Query: {q}, Category: {category}, Region: {region}")
     try:
         articles = get_news_service(
             q=q,
@@ -68,10 +72,13 @@ async def get_news(
         )
         return articles
     except InvalidDateFormatError as e:
+        logger.warning(f"Invalid date format: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except NewsFetchingError as e:
+        logger.error(f"News fetching error: {e}")
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
+        logger.error(f"Unexpected error in news endpoint: {e}", exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"An unexpected error occurred: {e}"
         )

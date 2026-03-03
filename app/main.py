@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +10,13 @@ from app.finance.router import router as finance_router
 from app.search.router import router as search_router
 from app.news.router import router as news_router
 from app.limiter import limiter
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # Disable default docs
 app = FastAPI(
@@ -41,7 +49,7 @@ app.include_router(news_router, prefix="/news", tags=["News"])
 @app.get("/", response_class=HTMLResponse, tags=["Root"])
 @limiter.limit("100/minute")
 async def read_root_and_serve_docs(request: Request):
-    
+    logger.info("Serving root documentation.")
     with open("README.md", "r") as f:
         md_content = f.read()
 

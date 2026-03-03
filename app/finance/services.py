@@ -36,6 +36,9 @@ class YFinanceError(Exception):
     pass
 
 
+import logging
+logger = logging.getLogger(__name__)
+
 def get_finance_data_service(
     ticker: str,
     fields: Optional[str],
@@ -62,8 +65,11 @@ def get_finance_data_service(
                     f"Ticker '{ticker}' not found or no valid market data available."
                 )
 
+    except TickerNotFoundError:
+        raise
     except Exception as e:
         # This can catch broader network issues or yfinance errors.
+        logger.error(f"Error initializing ticker '{ticker}': {e}")
         raise YFinanceError(f"Error initializing ticker '{ticker}': {e}")
 
     response_data = {"ticker": stock_info.get('symbol', ticker.upper())}
