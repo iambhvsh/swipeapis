@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 import markdown2
 
 from app.finance.router import router as finance_router
 from app.search.router import router as search_router
 from app.news.router import router as news_router
+from app.limiter import limiter
 
 # Disable default docs
 app = FastAPI(
@@ -15,6 +18,10 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None
 )
+
+# Configure rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
@@ -32,7 +39,8 @@ app.include_router(news_router, prefix="/news", tags=["News"])
 
 
 @app.get("/", response_class=HTMLResponse, tags=["Root"])
-async def read_root_and_serve_docs():
+@limiter.limit("100/minute")
+async def read_root_and_serve_docs(request: Request):
     
     with open("README.md", "r") as f:
         md_content = f.read()

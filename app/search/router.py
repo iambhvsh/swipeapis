@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
 from .services import search_service, SearchError, EmptyQueryError, \
     ALL_FIELDS
+from app.limiter import limiter
 
 router = APIRouter()
 
 
 @router.get("/", response_model=Dict[str, Any])
+@limiter.limit("60/minute")
 async def perform_search(
+    request: Request,
     q: str = Query(..., description="The search query string."),
     num_results: int = Query(
         10, ge=1, le=100, description="The maximum number of results to return."

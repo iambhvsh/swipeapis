@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
 from .services import get_news_service, InvalidDateFormatError, \
     NewsFetchingError
+from app.limiter import limiter
 
 router = APIRouter()
 
 
 @router.get("/", response_model=Dict[str, Any])
+@limiter.limit("60/minute")
 async def get_news(
+    request: Request,
     q: Optional[str] = Query(
         None,
         description="A search query for news articles. "
