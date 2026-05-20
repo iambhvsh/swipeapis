@@ -44,3 +44,10 @@ If not using Docker, invoke the runtime module directly:
 ```bash
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+## Testing
+
+Install the full dependency tree (which includes `pytest` and `httpx`) and run:
+```bash
+python -m pytest tests/
+```

@@ -5,3 +5,6 @@ ddgs
 pygooglenews
 vaderSentiment
 slowapi
+pytest
+pytest-asyncio
+httpx

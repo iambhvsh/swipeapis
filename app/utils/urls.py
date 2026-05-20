@@ -26,7 +26,7 @@ def normalize_url(url: str) -> str:
 
         # Strip trailing slash from path
         path = parsed.path
-        if path.endswith('/') and len(path) > 1:
+        if path.endswith('/'):
             path = path[:-1]
 
         # Filter tracking parameters

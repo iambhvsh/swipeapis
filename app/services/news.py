@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from app.providers.news.headlines import fetch_headlines, HeadlinesProviderError
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
@@ -81,6 +81,6 @@ def get_news_service(
         "total_articles": total_articles,
         "articles": article_list,
         "metadata": {
-            "generated_at": datetime.utcnow().isoformat() + "Z",
+            "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
         }
     }

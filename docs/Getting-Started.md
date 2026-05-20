@@ -49,3 +49,11 @@ When modifying Atlas, it is recommended to run the API with the `--reload` flag:
 python -m uvicorn app.main:app --reload
 ```
 This will automatically reload the application on code changes.
+
+## Running Tests
+
+To run the high-value infrastructure validation suite:
+```bash
+pip install -r requirements.txt
+python -m pytest tests/
+```
