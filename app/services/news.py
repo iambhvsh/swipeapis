@@ -60,7 +60,7 @@ def get_news_service(
     total_articles = provider_data.get("total_articles", 0)
 
     for article in article_list:
-        article["category"] = category if q or category else "top"
+        article["category"] = category or "top"
         article["language"] = language
         article["region"] = region
 

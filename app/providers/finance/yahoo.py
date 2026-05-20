@@ -24,6 +24,8 @@ def fetch_yahoo_finance_data(
         except Exception as e:
             raise YahooFinanceProviderError(f"Error fetching basic info: {e}") from e
 
+        info = info if isinstance(info, dict) else {}
+
         if not info or ('regularMarketPrice' not in info and 'currentPrice' not in info and 'previousClose' not in info):
             hist_check = stock.history(period="1d")
             if hist_check.empty:

@@ -48,7 +48,8 @@ async def search_service(
     safesearch = 'moderate' if safe else 'off'
 
     # Optimization: fetch just enough results per provider to be fast
-    provider_num_results = max(10, num_results + start)
+    MAX_PROVIDER_RESULTS = 100
+    provider_num_results = min(MAX_PROVIDER_RESULTS, max(10, num_results + start))
 
     # Tier 1 execution (Bing + Brave)
     tier1_tasks = [
@@ -91,12 +92,12 @@ async def search_service(
     seen_urls = set()
     deduped_results = []
 
-    for result in raw_results:
+    for idx, result in enumerate(raw_results, start=1):
         normalized = normalize_url(result['url'])
 
         # Keep original rank for position penalty scoring
         if 'original_rank' not in result:
-            result['original_rank'] = raw_results.index(result) + 1
+            result['original_rank'] = idx
 
         if normalized in seen_urls:
             # Increase frequency for ranking bonus
