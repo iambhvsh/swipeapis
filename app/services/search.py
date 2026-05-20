@@ -18,6 +18,7 @@ def search_service(
     include_rank: bool,
     fields: Optional[str]
 ) -> List[Dict[str, Any]]:
+    q = q.strip()
     if not q:
         raise EmptyQueryError("Search query cannot be empty.")
 
@@ -37,7 +38,6 @@ def search_service(
     safesearch = 'moderate' if safe else 'off'
 
     try:
-        # Aggregation layer (calling providers)
         raw_results = fetch_duckduckgo_results(
             q=q, region=region, safesearch=safesearch,
             start=start, num_results=num_results
@@ -45,21 +45,17 @@ def search_service(
     except DuckDuckGoProviderError as e:
         raise SearchError(str(e))
 
-    # Normalization, Deduplication and Ranking
     seen_urls = set()
     response_list = []
 
-    # Actually deduplicate
     for i, result in enumerate(raw_results):
         url = result['url']
         if url in seen_urls:
             continue
         seen_urls.add(url)
 
-        # Rank Orchestration Layer
         result['rank'] = start + len(response_list) + 1
 
-        # Format unified response
         res_dict = {
             key: value for key, value in result.items()
             if key in requested_fields

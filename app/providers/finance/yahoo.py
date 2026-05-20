@@ -22,16 +22,15 @@ def fetch_yahoo_finance_data(
         try:
             info = stock.info
         except Exception as e:
-            raise YahooFinanceProviderError(f"Error fetching basic info: {e}")
+            raise YahooFinanceProviderError(f"Error fetching basic info: {e}") from e
 
         if not info or ('regularMarketPrice' not in info and 'currentPrice' not in info and 'previousClose' not in info):
             hist_check = stock.history(period="1d")
             if hist_check.empty:
                 raise TickerNotFoundError(f"Ticker '{ticker}' not found.")
 
-        response_data = {"info": info}
+        response_data: Dict[str, Any] = {"info": info}
 
-        # Fallback for price if missing
         if info.get('currentPrice') is None and info.get('regularMarketPrice') is None:
             try:
                 fast_info = stock.fast_info
@@ -40,7 +39,6 @@ def fetch_yahoo_finance_data(
             except Exception:
                 pass
 
-        # Fallback for previous close if missing
         if info.get('previousClose') is None and info.get('regularMarketPreviousClose') is None:
             try:
                 hist_2d = stock.history(period="2d")
@@ -73,7 +71,8 @@ def fetch_yahoo_finance_data(
                 else:
                     response_data["historical"] = []
             except Exception as e:
-                response_data["historical"] = {"error": f"Could not fetch historical data: {e}"}
+                response_data["historical"] = []
+                response_data.setdefault("errors", []).append(f"Could not fetch historical data: {e}")
 
         if include_recommendations:
             try:
@@ -89,11 +88,12 @@ def fetch_yahoo_finance_data(
                 else:
                     response_data["recommendations"] = []
             except Exception as e:
-                response_data["recommendations"] = {"error": f"Could not fetch recommendations: {e}"}
+                response_data["recommendations"] = []
+                response_data.setdefault("errors", []).append(f"Could not fetch recommendations: {e}")
 
         return response_data
 
-    except TickerNotFoundError as e:
-        raise e
+    except TickerNotFoundError:
+        raise
     except Exception as e:
-        raise YahooFinanceProviderError(f"Error fetching data for ticker {ticker}: {e}")
+        raise YahooFinanceProviderError(f"Error fetching data for ticker {ticker}: {e}") from e

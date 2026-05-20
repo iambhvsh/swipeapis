@@ -14,7 +14,7 @@ Atlas relies on a clear separation of concerns, utilizing an extensible architec
 
 ### Modules
 
-- **Search**: Multi-engine search infrastructure with clean normalization and deduplication.
+- **Search**: DuckDuckGo-backed search infrastructure with clean normalization and deduplication.
 - **Finance**: Financial market data fetching and formatting.
 - **News**: Headline aggregation across multiple regions and categories.
 
@@ -32,7 +32,7 @@ Once deployed, the API exposes the following core endpoints:
 ### Search
 `GET /search`
 
-Query multiple search engines with safe defaults and robust deduplication.
+Query the web via DuckDuckGo (with architecture supporting future provider expansion) with safe defaults and robust deduplication.
 
 **Parameters:**
 - `q`: Search query string

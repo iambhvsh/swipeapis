@@ -4,5 +4,4 @@ yfinance
 ddgs
 pygooglenews
 vaderSentiment
-markdown2
 slowapi

@@ -27,7 +27,9 @@ def fetch_duckduckgo_results(
                     page=current_page,
                     backend="auto"
                 )
-            except Exception:
+            except Exception as e:
+                if current_page == 1:
+                    raise DuckDuckGoProviderError(f"DuckDuckGo search failed on first page: {e}") from e
                 break
 
             if not page_data:
@@ -38,7 +40,6 @@ def fetch_duckduckgo_results(
                 if url and url not in seen_urls:
                     seen_urls.add(url)
 
-                    # Formatting logic in provider
                     page_results_list.append({
                         "url": url,
                         "title": result.get('title', ''),
@@ -52,5 +53,7 @@ def fetch_duckduckgo_results(
 
         return page_results_list[start : start + num_results]
 
+    except DuckDuckGoProviderError:
+        raise
     except Exception as e:
-        raise DuckDuckGoProviderError(f"DuckDuckGo search failed: {e}")
+        raise DuckDuckGoProviderError(f"DuckDuckGo search failed: {e}") from e

@@ -1,11 +1,11 @@
+import logging
 from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
-from app.services.search import search_service, SearchError, EmptyQueryError, \
-    ALL_FIELDS
+from app.services.search import search_service, SearchError, EmptyQueryError, ALL_FIELDS
 from app.middleware.limits import limiter
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
-
 
 @router.get("/", response_model=Dict[str, Any])
 @limiter.limit("60/minute")
@@ -35,7 +35,7 @@ async def perform_search(
     )
 ):
     """
-    Performs a web search using Bing (via DDGS) and returns a list of results.
+    Performs a web search using DuckDuckGo and returns a list of results.
 
     This endpoint provides the URL, title, and description for each result.
     """
@@ -57,6 +57,7 @@ async def perform_search(
     except SearchError as e:
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
+        logger.exception("An unexpected error occurred during search.")
         raise HTTPException(
-            status_code=500, detail=f"An unexpected error occurred: {e}"
+            status_code=500, detail="An unexpected internal error occurred."
         )
