@@ -1,4 +1,4 @@
-# Self Hosting
+# Self-Hosting
 
 Atlas was built specifically with a self-host-first philosophy.
 

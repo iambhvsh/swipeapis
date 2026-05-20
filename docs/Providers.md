@@ -1,6 +1,6 @@
 # Providers
 
-Providers in Atlas serve strictly as data extraction adapters. They isolate upstream dependencies (like `ddgs` or `yfinance`) from the internal core.
+Providers in Atlas serve strictly as data extraction adapters. They isolate upstream dependencies (like `ddgs` or `yfinance`) from the internal core infrastructure.
 
 ## Search Providers
 
@@ -14,8 +14,8 @@ Providers are restricted from performing deduplication or ranking. Their only re
 
 ## Finance Providers
 
-- **Yahoo** (`yfinance` adapter). Fetches stock quotes, 52-week metrics, and graceful fallbacks for missing `previousClose` values.
+- **Yahoo** (`app/providers/finance/yahoo.py`): Built atop `yfinance`. This adapter handles real-time stock quotes, 52-week metrics, and graceful fallbacks for missing `previousClose` and `currentPrice` values via short-term historical aggregation. It strictly guarantees stable array return types.
 
 ## News Providers
 
-- **Headlines** (`pygooglenews` adapter). Aggregates topical or categorical headlines. It extracts summaries and publication dates but does *not* behave as a full article-scraping engine.
+- **Headlines** (`app/providers/news/headlines.py`): Built atop `pygooglenews`. Aggregates topical or categorical headlines globally. It extracts summaries and publication dates but does *not* behave as a full article-scraping engine. It focuses exclusively on headline metadata orchestration.

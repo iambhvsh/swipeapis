@@ -9,7 +9,11 @@ Atlas is designed to be run immediately with zero configuration. It is stateless
 
 ## Local Setup
 
-1. Clone the repository.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/iambhvsh/atlas.git
+   cd atlas
+   ```
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -26,9 +30,16 @@ The root endpoint returns the system status:
 curl http://127.0.0.1:8000/
 ```
 
-Run a search query:
+Run queries across endpoints:
 ```bash
+# Search metasearch
 curl "http://127.0.0.1:8000/search/?q=atlas"
+
+# Financial data
+curl "http://127.0.0.1:8000/finance/AAPL"
+
+# News headlines
+curl "http://127.0.0.1:8000/news/?category=technology"
 ```
 
 ## Development Workflow

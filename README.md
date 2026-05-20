@@ -20,7 +20,7 @@ Full framework documentation is provided in the `docs/` directory:
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-org/atlas.git
+git clone https://github.com/iambhvsh/atlas.git
 cd atlas
 pip install -r requirements.txt
 python -m uvicorn app.main:app
@@ -28,6 +28,8 @@ python -m uvicorn app.main:app
 
 ```bash
 curl "http://127.0.0.1:8000/search/?q=atlas"
+curl "http://127.0.0.1:8000/finance/AAPL"
+curl "http://127.0.0.1:8000/news/?category=technology"
 ```
 
 ## License

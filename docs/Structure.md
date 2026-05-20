@@ -2,7 +2,7 @@
 
 The repository maintains a flat and explicit structure.
 
-```
+```text
 app/
 ├── routes/        # HTTP entry points and validation
 ├── services/      # Aggregation, deduplication, and ranking logic

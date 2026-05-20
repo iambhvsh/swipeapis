@@ -18,7 +18,7 @@ npm i -g vercel
 vercel
 ```
 
-## Self Hosting
+## Self-Hosting
 
 If deploying directly onto a VPS or bare metal, use a robust ASGI server like `uvicorn` managed via `systemd` or `supervisor`.
 ```bash

@@ -18,6 +18,7 @@ class EmptyQueryError(Exception):
     pass
 
 ALL_FIELDS = ["url", "title", "description", "source", "rank", "provider", "score"]
+MAX_PROVIDER_RESULTS = 100
 
 async def search_service(
     q: str,
@@ -48,7 +49,6 @@ async def search_service(
     safesearch = 'moderate' if safe else 'off'
 
     # Optimization: fetch just enough results per provider to be fast
-    MAX_PROVIDER_RESULTS = 100
     provider_num_results = min(MAX_PROVIDER_RESULTS, max(10, num_results + start))
 
     # Tier 1 execution (Bing + Brave)
@@ -69,7 +69,7 @@ async def search_service(
 
     # Evaluate if we need Tier 2
     # Fallback triggers: low result count or low diversity
-    unique_urls_tier1 = len(set(normalize_url(r['url']) for r in raw_results))
+    unique_urls_tier1 = len(set(normalize_url(r.get('url')) for r in raw_results if r.get('url')))
 
     if unique_urls_tier1 < provider_num_results:
         logger.info(f"Tier 1 yielded only {unique_urls_tier1} unique results, executing Tier 2.")
@@ -93,7 +93,11 @@ async def search_service(
     deduped_results = []
 
     for idx, result in enumerate(raw_results, start=1):
-        normalized = normalize_url(result['url'])
+        raw_url = result.get('url')
+        if not raw_url:
+            continue
+
+        normalized = normalize_url(raw_url)
 
         # Keep original rank for position penalty scoring
         if 'original_rank' not in result:
@@ -102,7 +106,8 @@ async def search_service(
         if normalized in seen_urls:
             # Increase frequency for ranking bonus
             for existing in deduped_results:
-                if normalize_url(existing['url']) == normalized:
+                existing_url = existing.get('url')
+                if existing_url and normalize_url(existing_url) == normalized:
                     existing['frequency'] = existing.get('frequency', 1) + 1
                     break
             continue

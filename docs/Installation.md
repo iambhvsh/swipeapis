@@ -5,7 +5,7 @@ Atlas is lightweight and can be deployed in multiple environments.
 ## Cloning
 
 ```bash
-git clone https://github.com/your-org/atlas.git
+git clone https://github.com/iambhvsh/atlas.git
 cd atlas
 ```
 
