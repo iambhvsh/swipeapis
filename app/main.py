@@ -5,15 +5,15 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 import markdown2
 
-from app.finance.router import router as finance_router
-from app.search.router import router as search_router
-from app.news.router import router as news_router
-from app.limiter import limiter
+from app.routes.finance import router as finance_router
+from app.routes.search import router as search_router
+from app.routes.news import router as news_router
+from app.middleware.limits import limiter
 
 # Disable default docs
 app = FastAPI(
-    title="Swipe APIs",
-    description="A production-ready API hub for Finance, Search, and News.",
+    title="Atlas",
+    description="A modern self-hosted API infrastructure toolkit.",
     version="1.0.0",
     docs_url=None,
     redoc_url=None
@@ -62,7 +62,7 @@ async def read_root_and_serve_docs(request: Request):
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>🚀 Swipe APIs Documentation</title>
+        <title>Atlas Documentation</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

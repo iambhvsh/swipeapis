@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
-from .services import search_service, SearchError, EmptyQueryError, \
+from app.services.search import search_service, SearchError, EmptyQueryError, \
     ALL_FIELDS
-from app.limiter import limiter
+from app.middleware.limits import limiter
 
 router = APIRouter()
 
