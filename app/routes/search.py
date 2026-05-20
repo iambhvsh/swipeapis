@@ -31,16 +31,16 @@ async def perform_search(
         None,
         description="A comma-separated list of fields to return. "
                     f"Available fields: {', '.join(ALL_FIELDS)}. "
-                    "Defaults to all fields."
+                    "Defaults to basic fields."
     )
 ):
     """
-    Performs a web search using DuckDuckGo and returns a list of results.
+    Performs a metasearch using orchestrated backends and returns ranked results.
 
     This endpoint provides the URL, title, and description for each result.
     """
     try:
-        results = search_service(
+        results = await search_service(
             q=q,
             num_results=num_results,
             start=start,
