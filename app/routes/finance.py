@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query, Path, Request
 from typing import Optional
-from .services import get_finance_data_service, TickerNotFoundError, \
-    YFinanceError
-from app.limiter import limiter
+from app.services.finance import get_finance_data_service, TickerNotFoundError, \
+    FinanceServiceError
+from app.middleware.limits import limiter
 
 router = APIRouter()
 
@@ -58,7 +58,7 @@ async def get_finance_data(
         return data
     except TickerNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except YFinanceError as e:
+    except FinanceServiceError as e:
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         raise HTTPException(

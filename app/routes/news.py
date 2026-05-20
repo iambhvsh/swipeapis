@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
-from .services import get_news_service, InvalidDateFormatError, \
+from app.services.news import get_news_service, InvalidDateFormatError, \
     NewsFetchingError
-from app.limiter import limiter
+from app.middleware.limits import limiter
 
 router = APIRouter()
 
