@@ -1,38 +1,29 @@
 import logging
 from fastapi import APIRouter, HTTPException, Query, Request
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 from app.services.search import search_service, SearchError, EmptyQueryError, ALL_FIELDS
 from app.middleware.limits import limiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
 @router.get("/", response_model=Dict[str, Any])
 @limiter.limit("60/minute")
 async def perform_search(
     request: Request,
     q: str = Query(..., description="The search query string."),
-    num_results: int = Query(
-        10, ge=1, le=100, description="The maximum number of results to return."
-    ),
-    start: int = Query(
-        0, ge=0, description="The starting index of the results (for pagination)."
-    ),
-    language: str = Query(
-        "en", description="The language to use for the search (e.g., 'en', 'es')."
-    ),
-    safe: bool = Query(
-        True, description="Set to false to disable SafeSearch."
-    ),
-    include_rank: bool = Query(
-        False, description="Set to true to include the search result rank."
-    ),
+    num_results: int = Query(10, ge=1, le=100, description="The maximum number of results to return."),
+    start: int = Query(0, ge=0, description="The starting index of the results (for pagination)."),
+    language: str = Query("en", description="The language to use for the search (e.g., 'en', 'es')."),
+    safe: bool = Query(True, description="Set to false to disable SafeSearch."),
+    include_rank: bool = Query(False, description="Set to true to include the search result rank."),
     fields: Optional[str] = Query(
         None,
         description="A comma-separated list of fields to return. "
-                    f"Available fields: {', '.join(ALL_FIELDS)}. "
-                    "Defaults to basic fields."
-    )
+        f"Available fields: {', '.join(ALL_FIELDS)}. "
+        "Defaults to basic fields.",
+    ),
 ):
     """
     Performs a metasearch using orchestrated backends and returns ranked results.
@@ -47,17 +38,15 @@ async def perform_search(
             language=language,
             safe=safe,
             include_rank=include_rank,
-            fields=fields
+            fields=fields,
         )
         return {"results": results}
-    except EmptyQueryError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except EmptyQueryError:
+        raise HTTPException(status_code=400, detail="Search query cannot be empty.")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except SearchError as e:
         raise HTTPException(status_code=503, detail=str(e))
-    except Exception as e:
+    except Exception:
         logger.exception("An unexpected error occurred during search.")
-        raise HTTPException(
-            status_code=500, detail="An unexpected internal error occurred."
-        )
+        raise HTTPException(status_code=500, detail="An unexpected internal error occurred.")

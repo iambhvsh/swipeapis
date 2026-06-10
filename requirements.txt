@@ -1,9 +1,6 @@
 fastapi
 uvicorn
-yfinance
 ddgs
-pygooglenews
-vaderSentiment
 slowapi
 pytest
 pytest-asyncio

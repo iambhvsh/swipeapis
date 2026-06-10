@@ -1,5 +1,5 @@
 import urllib.parse
-import re
+
 
 def normalize_url(url: str) -> str:
     """
@@ -26,7 +26,7 @@ def normalize_url(url: str) -> str:
 
         # Strip trailing slash from path
         path = parsed.path
-        if path.endswith('/'):
+        if path.endswith("/"):
             path = path[:-1]
 
         # Filter tracking parameters
@@ -39,14 +39,16 @@ def normalize_url(url: str) -> str:
 
         new_query = urllib.parse.urlencode(filtered_params)
 
-        normalized = urllib.parse.urlunparse((
-            scheme,
-            netloc,
-            path,
-            parsed.params,
-            new_query,
-            "" # Ignore fragments for deduplication
-        ))
+        normalized = urllib.parse.urlunparse(
+            (
+                scheme,
+                netloc,
+                path,
+                parsed.params,
+                new_query,
+                "",  # Ignore fragments for deduplication
+            )
+        )
 
         return normalized
     except Exception:
