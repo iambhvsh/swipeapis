@@ -37,7 +37,7 @@ def rank_results(results: List[SearchResult], query: str) -> List[SearchResult]:
         score += calculate_quality_score(result)
         score += calculate_provider_score(result.provider)
         score += calculate_frequency_score(result.frequency)
-        score += calculate_rrf(result.original_rank) * 1000
+        score += calculate_rrf(result.original_rank) * settings.RRF_SCALE_FACTOR
 
         if query_type in {"entity", "navigational", "ambiguous"}:
             score += calculate_navigation_boost(query=query, title=result.title, url=result.url)

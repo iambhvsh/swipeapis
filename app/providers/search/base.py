@@ -15,7 +15,6 @@ def fetch_provider_sync(
     try:
         ddgs = DDGS()
         results = []
-        count = 0
         for r in ddgs.text(
             query=q,
             region=region,
@@ -23,7 +22,7 @@ def fetch_provider_sync(
             backend=backend,
             max_results=num_results,
         ):
-            if count >= num_results:
+            if len(results) >= num_results:
                 break
             url = r.get("href", r.get("url", ""))
             if url:
@@ -36,7 +35,6 @@ def fetch_provider_sync(
                         "provider": provider_name,
                     }
                 )
-            count += 1
         return results
     except Exception as e:
         raise error_class(f"{provider_name.capitalize()} search failed: {e}") from e

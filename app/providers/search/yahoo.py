@@ -14,5 +14,5 @@ def fetch_yahoo_sync(q: str, region: str, safesearch: str, num_results: int) -> 
 async def fetch_yahoo_results(
     q: str, region: str = "us-en", safesearch: str = "moderate", num_results: int = 10
 ) -> List[Dict[str, Any]]:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, fetch_yahoo_sync, q, region, safesearch, num_results)

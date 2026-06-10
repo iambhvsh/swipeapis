@@ -1,12 +1,12 @@
 # Atlas
 
-Atlas is a stateless, privacy-focused search engine API.
+Atlas is a stateless, privacy focused search engine API.
 
-Designed to be self-hosted, lightweight, and deterministic, Atlas aggregates, normalizes, and ranks search results across multiple provider backends in real-time. It explicitly avoids databases, tracking, user profiles, or artificial intelligence dependencies to ensure absolute transparency and predictable performance.
+Designed to be self hosted, lightweight, and deterministic, Atlas aggregates, normalizes, and ranks search results across multiple provider backends in real time. It explicitly avoids databases, tracking, user profiles, or artificial intelligence dependencies to ensure absolute transparency and predictable performance.
 
 ## Architecture
 
-Atlas follows a clean, single-responsibility architecture:
+Atlas follows a clean, single responsibility architecture:
 
 * **Routes**: Request validation and configuration (`app/routes/`).
 * **Providers**: Headless adapters for upstream search APIs (`app/providers/`).
@@ -66,7 +66,7 @@ curl "http://127.0.0.1:8000/"
 
 Ranking weights, duplicate penalties, provider thresholds, and navigational boosts are centralized in `app/config.py`. To customize how Atlas scores results, adjust these tunables.
 
-Atlas explicitly avoids "magic numbers" in its ranking algorithms.
+Atlas explicitly avoids magic numbers in its ranking algorithms.
 
 ## Development
 

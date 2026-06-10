@@ -46,6 +46,8 @@ async def read_root(request: Request):
                     "start": "integer - Pagination offset (default 0)",
                     "language": "string - Language code, e.g. 'en', 'es' (default 'en')",
                     "safe": "boolean - Enable SafeSearch (default true)",
+                    "include_rank": "boolean - Set to true to include the search result rank (default false)",
+                    "fields": "string - Comma-separated list of fields to return (e.g. 'title,summary') (default all)",
                 },
             }
         },
