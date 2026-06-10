@@ -1,7 +1,6 @@
-from ddgs import DDGS
 from typing import List, Dict, Any
-import urllib.parse
 import asyncio
+from app.providers.search.base import fetch_provider_sync
 
 
 class YahooProviderError(Exception):
@@ -9,34 +8,7 @@ class YahooProviderError(Exception):
 
 
 def fetch_yahoo_sync(q: str, region: str, safesearch: str, num_results: int) -> List[Dict[str, Any]]:
-    try:
-        ddgs = DDGS()
-        results = []
-        count = 0
-        for r in ddgs.text(
-            query=q,
-            region=region,
-            safesearch=safesearch,
-            backend="yahoo",
-            max_results=num_results,
-        ):
-            if count >= num_results:
-                break
-            url = r.get("href", r.get("url", ""))
-            if url:
-                results.append(
-                    {
-                        "url": url,
-                        "title": r.get("title", ""),
-                        "description": r.get("body", r.get("description", "")),
-                        "source": urllib.parse.urlparse(url).netloc,
-                        "provider": "yahoo",
-                    }
-                )
-            count += 1
-        return results
-    except Exception as e:
-        raise YahooProviderError(f"Yahoo search failed: {e}") from e
+    return fetch_provider_sync(q, region, safesearch, num_results, "yahoo", "yahoo", YahooProviderError)
 
 
 async def fetch_yahoo_results(

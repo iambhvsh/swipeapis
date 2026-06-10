@@ -9,7 +9,7 @@ from app.middleware.limits import limiter
 
 app = FastAPI(
     title="Atlas",
-    description="A modern self-hosted API infrastructure toolkit.",
+    description="A stateless, privacy-focused search engine API.",
     version="1.0.0",
     docs_url=None,
     redoc_url=None,
@@ -34,6 +34,19 @@ app.include_router(search_router, prefix="/search", tags=["Search"])
 async def read_root(request: Request):
     return {
         "name": "Atlas",
-        "description": "A modern self-hosted API infrastructure toolkit.",
+        "description": "A stateless, privacy-focused search engine API.",
         "version": "1.0.0",
+        "endpoints": {
+            "search": {
+                "path": "/search",
+                "method": "GET",
+                "parameters": {
+                    "q": "string (required) - The search query",
+                    "num_results": "integer - Max results to return (default 10)",
+                    "start": "integer - Pagination offset (default 0)",
+                    "language": "string - Language code, e.g. 'en', 'es' (default 'en')",
+                    "safe": "boolean - Enable SafeSearch (default true)",
+                },
+            }
+        },
     }

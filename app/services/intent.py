@@ -33,37 +33,9 @@ INFORMATIONAL_KEYWORDS = {
     "difference",
     "compare",
 }
-TRANSACTIONAL_KEYWORDS = {
-    "buy",
-    "price",
-    "pricing",
-    "cheap",
-    "discount",
-    "deal",
-    "order",
-    "shop",
-    "purchase",
-}
-LOCAL_KEYWORDS = {
-    "near me",
-    "nearby",
-    "closest",
-    "restaurant",
-    "hotel",
-    "cafe",
-    "hospital",
-    "pharmacy",
-    "coffee",
-}
-FRESHNESS_KEYWORDS = {
-    "news",
-    "latest",
-    "today",
-    "breaking",
-    "update",
-    "updates",
-    "recent",
-}
+TRANSACTIONAL_KEYWORDS = {"buy", "price", "pricing", "cheap", "discount", "deal", "order", "shop", "purchase"}
+LOCAL_KEYWORDS = {"near me", "nearby", "closest", "restaurant", "hotel", "cafe", "hospital", "pharmacy", "coffee"}
+FRESHNESS_KEYWORDS = {"news", "latest", "today", "breaking", "update", "updates", "recent"}
 
 
 def tokenize(text: str) -> List[str]:
@@ -76,19 +48,27 @@ def classify_query(query: str) -> str:
         return "informational"
 
     terms = tokenize(query)
+    terms_set = set(terms)
 
-    if any(keyword in query for keyword in FRESHNESS_KEYWORDS):
+    # First check multi-word keywords explicitly
+    if "sign in" in query or "near me" in query:
+        if "sign in" in query:
+            return "navigational"
+        if "near me" in query:
+            return "local"
+
+    # Then check token intersections
+    if FRESHNESS_KEYWORDS & terms_set:
         return "freshness"
-    if any(keyword in query for keyword in LOCAL_KEYWORDS):
+    if LOCAL_KEYWORDS & terms_set:
         return "local"
-    if any(keyword in query for keyword in TRANSACTIONAL_KEYWORDS):
+    if TRANSACTIONAL_KEYWORDS & terms_set:
         return "transactional"
-    if any(keyword in query for keyword in NAVIGATIONAL_KEYWORDS):
+    if NAVIGATIONAL_KEYWORDS & terms_set:
         return "navigational"
-    if any(keyword in query for keyword in INFORMATIONAL_KEYWORDS):
+    if INFORMATIONAL_KEYWORDS & terms_set:
         return "informational"
 
-    # Treat short queries as potentially ambiguous entity queries
     if len(terms) <= 2:
         return "ambiguous"
 
@@ -96,12 +76,15 @@ def classify_query(query: str) -> str:
 
 
 def extract_domain(url: str) -> str:
+    if not url or not isinstance(url, str):
+        return ""
     try:
+        url = url.strip()
         domain = urlparse(url).netloc.lower()
         if domain.startswith("www."):
             domain = domain[4:]
         return domain
-    except Exception:
+    except (AttributeError, ValueError):
         return ""
 
 
@@ -119,11 +102,9 @@ def calculate_navigation_boost(query: str, title: str, url: str) -> float:
     elif query in title:
         score += settings.NAV_CONTAINS
 
-    # Domain match is the strongest signal for navigational/entity queries.
-    # If the user searches "apple", apple.com should be boosted massively to beat Wikipedia.
     domain_parts = domain.split(".")
     for term in query_terms:
-        if term in domain_parts:
+        if len(term) >= 3 and term in domain_parts:
             score += settings.NAV_DOMAIN_MATCH
 
     return score

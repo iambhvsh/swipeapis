@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Set
 
 
@@ -10,7 +10,7 @@ class SearchResult(BaseModel):
     provider: str = ""
     frequency: int = 1
     original_rank: int = 1
-    providers: List[str] = []
+    providers: List[str] = Field(default_factory=list)
     score: float = 0.0
     rank: int = 0
     published_date: Optional[str] = None

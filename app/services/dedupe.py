@@ -20,6 +20,7 @@ def merge_duplicate_urls(results: List[SearchResult]) -> List[SearchResult]:
             continue
 
         normalized_url = normalize_url(result.url)
+        result.url = normalized_url
 
         if normalized_url not in merged:
             result.frequency = 1

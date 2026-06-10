@@ -18,11 +18,29 @@ Atlas follows a clean, single-responsibility architecture:
 
 Atlas requires Python 3.10+.
 
+<details>
+<summary>macOS / Linux</summary>
+
 ```bash
 git clone https://github.com/atlas-search/atlas.git
 cd atlas
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
+</details>
+
+<details>
+<summary>Windows</summary>
+
+```powershell
+git clone https://github.com/atlas-search/atlas.git
+cd atlas
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+```
+</details>
 
 ## Quick Start
 
@@ -35,7 +53,13 @@ python -m uvicorn app.main:app
 Execute a search:
 
 ```bash
-curl "http://127.0.0.1:8000/search/?q=react"
+curl "http://127.0.0.1:8000/search?q=react"
+```
+
+To see the API description and endpoint specifications, fetch the root:
+
+```bash
+curl "http://127.0.0.1:8000/"
 ```
 
 ## Configuration

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/", response_model=Dict[str, Any])
+@router.get("", response_model=Dict[str, Any])
 @limiter.limit("60/minute")
 async def perform_search(
     request: Request,
@@ -40,13 +40,29 @@ async def perform_search(
             include_rank=include_rank,
             fields=fields,
         )
-        return {"results": results}
+        return {"total_count": len(results), "results": results}
     except EmptyQueryError:
-        raise HTTPException(status_code=400, detail="Search query cannot be empty.")
+        raise HTTPException(status_code=400, detail="Search query cannot be empty.") from None
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Invalid fields requested.") from e
     except SearchError as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e)) from e
     except Exception:
         logger.exception("An unexpected error occurred during search.")
-        raise HTTPException(status_code=500, detail="An unexpected internal error occurred.")
+        raise HTTPException(status_code=500, detail="An unexpected internal error occurred.") from None
+
+
+# Add alias for trailing slash just in case
+@router.get("/", response_model=Dict[str, Any], include_in_schema=False)
+@limiter.limit("60/minute")
+async def perform_search_slash(
+    request: Request,
+    q: str = Query(..., description="The search query string."),
+    num_results: int = Query(10, ge=1, le=100, description="The maximum number of results to return."),
+    start: int = Query(0, ge=0, description="The starting index of the results (for pagination)."),
+    language: str = Query("en", description="The language to use for the search (e.g., 'en', 'es')."),
+    safe: bool = Query(True, description="Set to false to disable SafeSearch."),
+    include_rank: bool = Query(False, description="Set to true to include the search result rank."),
+    fields: Optional[str] = Query(None),
+):
+    return await perform_search(request, q, num_results, start, language, safe, include_rank, fields)

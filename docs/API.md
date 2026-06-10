@@ -4,7 +4,7 @@ Atlas exposes a single, straightforward search endpoint.
 
 ## The Search Endpoint
 
-`GET /search/`
+`GET /search`
 
 Executes a federated search across all active providers, deduplicates the results, ranks them according to configured heuristics, and returns a paginated JSON response.
 
@@ -28,6 +28,7 @@ Returns the structured search results.
 
 ```json
 {
+  "total_count": 1,
   "results": [
     {
       "url": "https://en.wikipedia.org/wiki/Atlas",

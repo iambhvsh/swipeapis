@@ -1,7 +1,6 @@
-from ddgs import DDGS
 from typing import List, Dict, Any
-import urllib.parse
 import asyncio
+from app.providers.search.base import fetch_provider_sync
 
 
 class DuckDuckGoProviderError(Exception):
@@ -9,34 +8,7 @@ class DuckDuckGoProviderError(Exception):
 
 
 def fetch_duckduckgo_sync(q: str, region: str, safesearch: str, num_results: int) -> List[Dict[str, Any]]:
-    try:
-        ddgs = DDGS()
-        results = []
-        count = 0
-        for r in ddgs.text(
-            query=q,
-            region=region,
-            safesearch=safesearch,
-            backend="html",
-            max_results=num_results,
-        ):
-            if count >= num_results:
-                break
-            url = r.get("href", r.get("url", ""))
-            if url:
-                results.append(
-                    {
-                        "url": url,
-                        "title": r.get("title", ""),
-                        "description": r.get("body", r.get("description", "")),
-                        "source": urllib.parse.urlparse(url).netloc,
-                        "provider": "duckduckgo",
-                    }
-                )
-            count += 1
-        return results
-    except Exception as e:
-        raise DuckDuckGoProviderError(f"DuckDuckGo search failed: {e}") from e
+    return fetch_provider_sync(q, region, safesearch, num_results, "duckduckgo", "duckduckgo", DuckDuckGoProviderError)
 
 
 async def fetch_duckduckgo_results(

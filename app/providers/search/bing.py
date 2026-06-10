@@ -1,7 +1,6 @@
-from ddgs import DDGS
 from typing import List, Dict, Any
-import urllib.parse
 import asyncio
+from app.providers.search.base import fetch_provider_sync
 
 
 class BingProviderError(Exception):
@@ -9,37 +8,7 @@ class BingProviderError(Exception):
 
 
 def fetch_bing_sync(q: str, region: str, safesearch: str, num_results: int) -> List[Dict[str, Any]]:
-    try:
-        ddgs = DDGS()
-        results = []
-        # ddgs text yields results.
-        # We only want to fetch up to num_results to optimize latency.
-        # DDGS automatically handles backend and pagination.
-        count = 0
-        for r in ddgs.text(
-            query=q,
-            region=region,
-            safesearch=safesearch,
-            backend="bing",
-            max_results=num_results,
-        ):
-            if count >= num_results:
-                break
-            url = r.get("href", r.get("url", ""))
-            if url:
-                results.append(
-                    {
-                        "url": url,
-                        "title": r.get("title", ""),
-                        "description": r.get("body", r.get("description", "")),
-                        "source": urllib.parse.urlparse(url).netloc,
-                        "provider": "bing",
-                    }
-                )
-            count += 1
-        return results
-    except Exception as e:
-        raise BingProviderError(f"Bing search failed: {e}") from e
+    return fetch_provider_sync(q, region, safesearch, num_results, "bing", "bing", BingProviderError)
 
 
 async def fetch_bing_results(
