@@ -11,6 +11,11 @@ The `Settings` class dictates how Atlas governs limits, penalties, and multiplie
 * `MAX_PROVIDER_RESULTS`: The absolute limit of results fetched per upstream provider.
 * `PROVIDER_WEIGHTS`: A dictionary defining the base confidence score for each provider (Bing, Brave, DuckDuckGo, Yahoo).
 
+### Rate Limits
+
+* `SEARCH_RATE_LIMIT`: The public search endpoint request limit.
+* `ROOT_RATE_LIMIT`: The root metadata endpoint request limit.
+
 ### Reciprocal Rank Fusion
 
 * `RRF_K`: The constant used in the Reciprocal Rank Fusion algorithm to calculate the baseline score from a result's original provider rank.
@@ -51,5 +56,14 @@ Navigational boosts apply only to queries classified as entity or navigational i
 
 * `FREQUENCY_MULTIPLIER`: Points awarded per additional upstream provider that returned the exact same URL.
 * `FRESHNESS_MULTIPLIER`: Points awarded when recent dates or hours are detected in the metadata of a query classified with freshness intent.
+
+### Authority Signals
+
+* `OFFICIAL_DOMAIN_MATCH`: Boost awarded when a compact query matches the domain stem, such as `next.js` matching `nextjs.org`.
+* `PARTIAL_DOMAIN_MATCH`: Smaller boost for partial domain matches on entity and navigational queries.
+* `HOMEPAGE_AUTHORITY_BONUS`: Additional score for official homepage results.
+* `HIGH_AUTHORITY_SOURCE_BONUS`: Score used for trusted public-interest sources such as `.gov` and `.edu`.
+* `LOW_AUTHORITY_SOURCE_PENALTY`: Penalty for configured low-authority domains.
+* `TITLE_NOISE_PENALTY`: Penalty for overly long or aggregated titles.
 
 Modifying these parameters in `app/config.py` allows administrators to adjust the ranking behavior without altering core application logic.

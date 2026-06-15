@@ -1,6 +1,8 @@
 from ddgs import DDGS
-from typing import List, Dict, Any, Type
+from typing import Type
 import urllib.parse
+
+from app.models import RawSearchResult
 
 
 def fetch_provider_sync(
@@ -11,10 +13,10 @@ def fetch_provider_sync(
     backend: str,
     provider_name: str,
     error_class: Type[Exception],
-) -> List[Dict[str, Any]]:
+) -> list[RawSearchResult]:
     try:
         ddgs = DDGS()
-        results = []
+        results: list[RawSearchResult] = []
         for r in ddgs.text(
             query=q,
             region=region,

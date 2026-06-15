@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
+from app.config import settings
 from app.routes.search import router as search_router
 from app.middleware.limits import limiter
 
@@ -30,7 +31,7 @@ app.include_router(search_router, prefix="/search", tags=["Search"])
 
 
 @app.get("/", response_class=JSONResponse, tags=["Root"])
-@limiter.limit("100/minute")
+@limiter.limit(settings.ROOT_RATE_LIMIT)
 async def read_root(request: Request):
     return {
         "name": "Atlas",
@@ -47,7 +48,7 @@ async def read_root(request: Request):
                     "language": "string - Language code, e.g. 'en', 'es' (default 'en')",
                     "safe": "boolean - Enable SafeSearch (default true)",
                     "include_rank": "boolean - Set to true to include the search result rank (default false)",
-                    "fields": "string - Comma-separated list of fields to return (e.g. 'title,summary') (default all)",
+                    "fields": "string - Comma-separated list of fields to return (e.g. 'title,description') (default basic fields)",
                 },
             }
         },

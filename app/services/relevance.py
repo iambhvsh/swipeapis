@@ -1,9 +1,8 @@
-from typing import List
 import re
 from app.config import settings
 
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str) -> list[str]:
     return re.findall(r"\w+", text.lower())
 
 

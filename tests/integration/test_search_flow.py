@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from app.config import settings
 from app.main import app
 from fastapi.testclient import TestClient
 
@@ -84,3 +85,35 @@ def test_search_tier2_fallback(mock_yahoo, mock_ddg, mock_brave, mock_bing):
     # Assert Tier 2 was called because Tier 1 didn't meet the quota
     assert mock_ddg.called
     assert mock_yahoo.called
+
+
+@patch("app.services.search.fetch_bing_results")
+@patch("app.services.search.fetch_brave_results")
+@patch("app.services.search.fetch_duckduckgo_results")
+@patch("app.services.search.fetch_yahoo_results")
+def test_search_total_count_reports_ranked_total_before_pagination(mock_yahoo, mock_ddg, mock_brave, mock_bing):
+    mock_bing.return_value = [
+        {
+            "url": f"https://{i}.example.com/{i}",
+            "title": f"Title {i}",
+            "description": "Description",
+            "provider": "bing",
+            "source": f"{i}.example.com",
+        }
+        for i in range(12)
+    ]
+    mock_brave.return_value = []
+    mock_ddg.return_value = []
+    mock_yahoo.return_value = []
+
+    response = client.get("/search/?q=test&num_results=5")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_count"] == 12
+    assert len(data["results"]) == 5
+
+
+def test_public_rate_limits_are_30_per_minute():
+    assert settings.ROOT_RATE_LIMIT == "30/minute"
+    assert settings.SEARCH_RATE_LIMIT == "30/minute"

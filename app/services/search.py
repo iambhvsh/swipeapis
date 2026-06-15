@@ -1,7 +1,9 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, cast
 
+from app.config import settings
+from app.models import RawSearchResult, SearchField, SearchResponse
 from app.providers.search.bing import fetch_bing_results
 from app.providers.search.brave import fetch_brave_results
 from app.providers.search.duckduckgo import fetch_duckduckgo_results
@@ -21,61 +23,53 @@ class EmptyQueryError(Exception):
     pass
 
 
-ALL_FIELDS = ["url", "title", "description", "source", "rank", "provider", "score"]
+ALL_FIELDS: tuple[SearchField, ...] = (
+    "url",
+    "title",
+    "description",
+    "source",
+    "rank",
+    "provider",
+    "providers",
+    "score",
+    "published_date",
+)
 
-MAX_PROVIDER_RESULTS = 100
+DEFAULT_FIELDS: set[SearchField] = {"url", "title", "description", "source", "rank"}
 
 
-def deduplicate_results(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    seen_urls = set()
-    deduped_results: List[Dict[str, Any]] = []
+def parse_requested_fields(fields: str | None) -> set[SearchField]:
+    if not fields:
+        return set(DEFAULT_FIELDS)
 
-    for idx, result in enumerate(results, start=1):
-        raw_url = result.get("url")
+    requested = {field.strip() for field in fields.split(",") if field.strip()}
+    available = set(ALL_FIELDS)
 
-        if not raw_url:
-            continue
+    if not requested:
+        raise ValueError("Fields cannot be empty.")
+    if not requested.issubset(available):
+        invalid_fields = sorted(requested - available)
+        raise ValueError(f"Invalid fields requested: {', '.join(invalid_fields)}")
 
-        normalized = normalize_url(raw_url)
-
-        if "original_rank" not in result:
-            result["original_rank"] = idx
-
-        if normalized in seen_urls:
-            for existing in deduped_results:
-                existing_url = existing.get("url")
-
-                if existing_url and normalize_url(existing_url) == normalized:
-                    existing["frequency"] = existing.get("frequency", 1) + 1
-                    break
-
-            continue
-
-        seen_urls.add(normalized)
-        result["frequency"] = 1
-        deduped_results.append(result)
-
-    return deduped_results
+    return cast(set[SearchField], requested)
 
 
 async def search_service(
-    q: str, num_results: int, start: int, language: str, safe: bool, include_rank: bool, fields: Optional[str]
-) -> List[Dict[str, Any]]:
+    q: str,
+    num_results: int,
+    start: int,
+    language: str,
+    safe: bool,
+    include_rank: bool,
+    fields: str | None,
+) -> SearchResponse:
 
     q = q.strip()
 
     if not q:
         raise EmptyQueryError("Search query cannot be empty.")
 
-    if fields:
-        requested_fields = {field.strip() for field in fields.split(",")}
-
-        if not requested_fields.issubset(ALL_FIELDS):
-            invalid_fields = requested_fields - set(ALL_FIELDS)
-
-            raise ValueError(f"Invalid fields requested: {', '.join(invalid_fields)}")
-    else:
-        requested_fields = {"url", "title", "description", "source", "rank"}
+    requested_fields = parse_requested_fields(fields)
 
     region_map = {
         "en": "us-en",
@@ -93,7 +87,7 @@ async def search_service(
 
     safesearch = "moderate" if safe else "off"
 
-    provider_num_results = min(MAX_PROVIDER_RESULTS, max(10, num_results + start))
+    provider_num_results = min(settings.MAX_PROVIDER_RESULTS, max(10, num_results + start))
 
     bing_task = asyncio.wait_for(fetch_bing_results(q, region, safesearch, provider_num_results), timeout=10.0)
 
@@ -101,17 +95,17 @@ async def search_service(
 
     bing_result, brave_result = await asyncio.gather(bing_task, brave_task, return_exceptions=True)
 
-    raw_results: List[Dict[str, Any]] = []
+    raw_results: list[RawSearchResult] = []
 
     if isinstance(bing_result, Exception):
         logger.warning("Bing failed: %r (%s)", bing_result, type(bing_result).__name__)
     else:
-        raw_results.extend(cast(List[Dict[str, Any]], bing_result))
+        raw_results.extend(cast(list[RawSearchResult], bing_result))
 
     if isinstance(brave_result, Exception):
         logger.warning("Brave failed: %r (%s)", brave_result, type(brave_result).__name__)
     else:
-        raw_results.extend(cast(List[Dict[str, Any]], brave_result))
+        raw_results.extend(cast(list[RawSearchResult], brave_result))
 
     unique_urls_tier1 = len({normalize_url(url) for r in raw_results if (url := r.get("url"))})
 
@@ -131,7 +125,7 @@ async def search_service(
             if isinstance(result, Exception):
                 logger.warning("%s failed: %r (%s)", provider_name, result, type(result).__name__)
             else:
-                raw_results.extend(cast(List[Dict[str, Any]], result))
+                raw_results.extend(cast(list[RawSearchResult], result))
 
     if not raw_results:
         raise SearchError("All search providers failed to return results.")
@@ -140,14 +134,14 @@ async def search_service(
 
     ranked_results = rank_results(processed_results, q)
 
-    paginated = ranked_results[start:start + num_results]
+    paginated = ranked_results[start : start + num_results]
 
-    final_response: List[Dict[str, Any]] = []
+    final_results: list[dict[str, Any]] = []
 
     for res in paginated:
         filtered = res.model_dump_filtered(requested_fields)
         if not include_rank and "rank" in filtered:
             del filtered["rank"]
-        final_response.append(filtered)
+        final_results.append(filtered)
 
-    return final_response
+    return SearchResponse(total_count=len(ranked_results), results=final_results)

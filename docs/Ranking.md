@@ -26,16 +26,20 @@ Scores are augmented based on the reputation of the origin provider and the cros
 * If multiple providers return the same URL, it is awarded a frequency multiplier.
 * A base score is established using Reciprocal Rank Fusion based on the URL's original position from the upstream provider.
 
-### 5. Intent Specific Boosts
+### 5. Authority Scoring
+
+Authority scoring boosts official compact-domain matches, trusted reference sources, and official homepages. It also applies penalties to configured low-authority domains and noisy aggregated titles.
+
+### 6. Intent Specific Boosts
 If the query indicates navigational, entity, or ambiguous intent, the system applies heavy boosts to official domains matching the query terms. If the query indicates freshness intent, the system applies a boost for dates or recent time indicators parsed from the metadata.
 
-### 6. Safety Penalties
+### 7. Safety Penalties
 Severe point deductions are applied to results lacking a title, URL, or description.
 
-### 7. Diversity Enforcement
+### 8. Diversity Enforcement
 Results are sorted by score, then passed to `app/services/diversity.py`.
 * Results from a single domain are capped at a strict maximum.
 * Subsequent results from the same domain receive compounding score penalties.
 
-### 8. Final Sort
+### 9. Final Sort
 The final array is sorted by the diversified score, assigned a strict index rank, and returned.

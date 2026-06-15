@@ -2,8 +2,12 @@ from types import MappingProxyType
 
 
 class Settings:
+    # Rate limits
+    SEARCH_RATE_LIMIT = "30/minute"
+    ROOT_RATE_LIMIT = "30/minute"
+
     # Providers
-    MAX_PROVIDER_RESULTS = 15
+    MAX_PROVIDER_RESULTS = 100
     _PROVIDER_WEIGHTS_DATA = {
         "bing": 100,
         "brave": 95,
@@ -47,6 +51,14 @@ class Settings:
 
     # Freshness
     FRESHNESS_MULTIPLIER = 50.0
+
+    # Authority
+    OFFICIAL_DOMAIN_MATCH = 350.0
+    PARTIAL_DOMAIN_MATCH = 75.0
+    HOMEPAGE_AUTHORITY_BONUS = 60.0
+    HIGH_AUTHORITY_SOURCE_BONUS = 90.0
+    LOW_AUTHORITY_SOURCE_PENALTY = -80.0
+    TITLE_NOISE_PENALTY = -70.0
 
 
 settings = Settings()

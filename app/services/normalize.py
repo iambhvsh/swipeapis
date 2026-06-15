@@ -10,12 +10,12 @@ def normalize_title(title: str) -> str:
     return title
 
 
-def normalize_description(description: str, max_length: int = 1000) -> str:
+def normalize_description(description: str, max_length: int = 360) -> str:
     """
     Clean description text.
     """
     description = description.strip()
     description = re.sub(r"\s+", " ", description)
     if len(description) > max_length:
-        description = description[:max_length]
+        description = description[: max_length - 1].rstrip() + "..."
     return description

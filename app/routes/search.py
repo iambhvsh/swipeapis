@@ -1,6 +1,10 @@
 import logging
+from typing import Optional
+
 from fastapi import APIRouter, HTTPException, Query, Request
-from typing import Dict, Any, Optional
+
+from app.config import settings
+from app.models import SearchResponse
 from app.services.search import search_service, SearchError, EmptyQueryError, ALL_FIELDS
 from app.middleware.limits import limiter
 
@@ -8,8 +12,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("", response_model=Dict[str, Any])
-@limiter.limit("60/minute")
+@router.get("", response_model=SearchResponse)
+@limiter.limit(settings.SEARCH_RATE_LIMIT)
 async def perform_search(
     request: Request,
     q: str = Query(..., description="The search query string."),
@@ -31,7 +35,7 @@ async def perform_search(
     This endpoint provides the URL, title, and description for each result.
     """
     try:
-        results = await search_service(
+        return await search_service(
             q=q,
             num_results=num_results,
             start=start,
@@ -40,7 +44,6 @@ async def perform_search(
             include_rank=include_rank,
             fields=fields,
         )
-        return {"total_count": len(results), "results": results}
     except EmptyQueryError:
         raise HTTPException(status_code=400, detail="Search query cannot be empty.") from None
     except ValueError as e:

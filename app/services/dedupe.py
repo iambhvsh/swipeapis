@@ -1,19 +1,22 @@
-from typing import List, Dict, Any
 from collections import defaultdict
+from urllib.parse import urlparse
+
+from app.models import RawSearchResult, SearchResult
 from app.utils.urls import normalize_url
 from app.services.normalize import normalize_title, normalize_description
-from app.models import SearchResult
+
+GENERIC_DUPLICATE_TITLES = {"", "home", "homepage", "login", "sign in", "documentation", "docs"}
 
 
-def enrich_results(results: List[SearchResult]) -> List[SearchResult]:
+def enrich_results(results: list[SearchResult]) -> list[SearchResult]:
     for result in results:
         result.title = result.title.strip()
         result.description = normalize_description(result.description)
     return results
 
 
-def merge_duplicate_urls(results: List[SearchResult]) -> List[SearchResult]:
-    merged: Dict[str, SearchResult] = {}
+def merge_duplicate_urls(results: list[SearchResult]) -> list[SearchResult]:
+    merged: dict[str, SearchResult] = {}
 
     for idx, result in enumerate(results, start=1):
         if not result.url:
@@ -21,6 +24,7 @@ def merge_duplicate_urls(results: List[SearchResult]) -> List[SearchResult]:
 
         normalized_url = normalize_url(result.url)
         result.url = normalized_url
+        result.source = urlparse(normalized_url).netloc
 
         if normalized_url not in merged:
             result.frequency = 1
@@ -39,22 +43,28 @@ def merge_duplicate_urls(results: List[SearchResult]) -> List[SearchResult]:
     return list(merged.values())
 
 
-def merge_duplicate_titles(results: List[SearchResult]) -> List[SearchResult]:
-    grouped = defaultdict(list)
+def merge_duplicate_titles(results: list[SearchResult]) -> list[SearchResult]:
+    grouped: defaultdict[str, list[SearchResult]] = defaultdict(list)
+    final_results: list[SearchResult] = []
 
     for result in results:
         norm_title = normalize_title(result.title)
+        if norm_title in GENERIC_DUPLICATE_TITLES:
+            final_results.append(result)
+            continue
         grouped[norm_title].append(result)
 
-    final_results = []
     for items in grouped.values():
+        if len(items) == 1:
+            final_results.append(items[0])
+            continue
         best = max(items, key=lambda item: (item.frequency, len(item.description)))
         final_results.append(best)
 
     return final_results
 
 
-def process_results(raw_results: List[Dict[str, Any]]) -> List[SearchResult]:
+def process_results(raw_results: list[RawSearchResult]) -> list[SearchResult]:
     models = [SearchResult(**r) for r in raw_results]
 
     results = enrich_results(models)

@@ -1,4 +1,3 @@
-from typing import List
 from collections import defaultdict
 from urllib.parse import urlparse
 from app.models import SearchResult
@@ -15,7 +14,7 @@ def extract_domain(url: str) -> str:
         return ""
 
 
-def apply_domain_diversity(results: List[SearchResult]) -> List[SearchResult]:
+def apply_domain_diversity(results: list[SearchResult]) -> list[SearchResult]:
     domain_seen = defaultdict(int)
     diversified_results = []
 
@@ -29,7 +28,7 @@ def apply_domain_diversity(results: List[SearchResult]) -> List[SearchResult]:
     return diversified_results
 
 
-def remove_excessive_domain_results(results: List[SearchResult]) -> List[SearchResult]:
+def remove_excessive_domain_results(results: list[SearchResult]) -> list[SearchResult]:
     filtered_results = []
     domain_counts = defaultdict(int)
 
@@ -43,7 +42,7 @@ def remove_excessive_domain_results(results: List[SearchResult]) -> List[SearchR
     return filtered_results
 
 
-def diversify_results(results: List[SearchResult]) -> List[SearchResult]:
+def diversify_results(results: list[SearchResult]) -> list[SearchResult]:
     results = remove_excessive_domain_results(results)
     results = apply_domain_diversity(results)
     results.sort(key=lambda x: x.score, reverse=True)

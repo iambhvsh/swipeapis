@@ -1,7 +1,9 @@
 import re
-from typing import List
+from typing import Literal
 from urllib.parse import urlparse
 from app.config import settings
+
+QueryIntent = Literal["freshness", "local", "transactional", "navigational", "informational", "ambiguous", "entity"]
 
 NAVIGATIONAL_KEYWORDS = {
     "login",
@@ -38,11 +40,18 @@ LOCAL_KEYWORDS = {"near me", "nearby", "closest", "restaurant", "hotel", "cafe",
 FRESHNESS_KEYWORDS = {"news", "latest", "today", "breaking", "update", "updates", "recent"}
 
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str) -> list[str]:
     return re.findall(r"\w+", text.lower())
 
 
-def classify_query(query: str) -> str:
+def has_entity_shape(query: str, terms: list[str]) -> bool:
+    compact = "".join(terms)
+    has_version_marker = any(char.isdigit() for char in query)
+    has_brand_punctuation = any(char in query for char in {".", "+", "#"})
+    return len(terms) <= 3 and (has_version_marker or has_brand_punctuation or len(compact) >= 4)
+
+
+def classify_query(query: str) -> QueryIntent:
     query = query.strip().lower()
     if not query:
         return "informational"
@@ -68,6 +77,9 @@ def classify_query(query: str) -> str:
         return "navigational"
     if INFORMATIONAL_KEYWORDS & terms_set:
         return "informational"
+
+    if has_entity_shape(query, terms):
+        return "entity"
 
     if len(terms) <= 2:
         return "ambiguous"

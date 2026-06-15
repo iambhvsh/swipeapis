@@ -1,8 +1,7 @@
-from typing import List
-
 from app.services.intent import classify_query, calculate_navigation_boost
 from app.services.relevance import calculate_relevance
 from app.services.quality import calculate_quality_score
+from app.services.authority import calculate_authority_score
 from app.services.diversity import diversify_results
 from app.services.freshness import calculate_freshness_score
 from app.models import SearchResult
@@ -21,7 +20,7 @@ def calculate_frequency_score(frequency: int) -> float:
     return frequency * settings.FREQUENCY_MULTIPLIER
 
 
-def rank_results(results: List[SearchResult], query: str) -> List[SearchResult]:
+def rank_results(results: list[SearchResult], query: str) -> list[SearchResult]:
     query_type = classify_query(query)
 
     for result in results:
@@ -35,6 +34,12 @@ def rank_results(results: List[SearchResult], query: str) -> List[SearchResult]:
         )
 
         score += calculate_quality_score(result)
+        score += calculate_authority_score(
+            query=query,
+            title=result.title,
+            url=result.url,
+            query_intent=query_type,
+        )
         score += calculate_provider_score(result.provider)
         score += calculate_frequency_score(result.frequency)
         score += calculate_rrf(result.original_rank) * settings.RRF_SCALE_FACTOR

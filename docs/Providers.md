@@ -28,7 +28,7 @@ If the resulting unique URLs from Tier 1 fall below the configured threshold, At
 Each provider adapter must implement a single public asynchronous function responsible for:
 
 1. Accepting the query string, region, SafeSearch parameter, and maximum result limit.
-2. Executing the remote request (using `httpx` or `ddgs`).
+2. Executing the remote request using `ddgs`.
 3. Parsing the external response into a standardized list of dictionaries containing `title`, `url`, `description`, `source`, and `provider`.
 4. Returning the parsed list to the orchestrator.
 

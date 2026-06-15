@@ -12,6 +12,7 @@ Atlas follows a clean, single responsibility architecture:
 * **Providers**: Headless adapters for upstream search APIs (`app/providers/`).
 * **Intent**: Query understanding and classification (`app/services/intent.py`).
 * **Ranker**: Explainable scoring pipeline across diverse signals (`app/services/ranker.py`).
+* **Authority**: Domain and source-quality scoring for official and trusted results (`app/services/authority.py`).
 * **Dedupe**: Strict metadata and URL normalization to merge duplicate results (`app/services/dedupe.py`).
 
 ## Installation
@@ -64,7 +65,7 @@ curl "http://127.0.0.1:8000/"
 
 ## Configuration
 
-Ranking weights, duplicate penalties, provider thresholds, and navigational boosts are centralized in `app/config.py`. To customize how Atlas scores results, adjust these tunables.
+Ranking weights, duplicate penalties, provider thresholds, authority boosts, and rate limits are centralized in `app/config.py`. To customize how Atlas scores results, adjust these tunables.
 
 Atlas explicitly avoids magic numbers in its ranking algorithms.
 

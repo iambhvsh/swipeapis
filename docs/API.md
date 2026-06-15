@@ -17,8 +17,8 @@ Executes a federated search across all active providers, deduplicates the result
 | `start` | integer | No | 0 | The starting index of the results. Used for pagination. |
 | `language` | string | No | "en" | The language code to use for the search. Supports en, es, fr, de, ja, zh, ru, pt, it. |
 | `safe` | boolean | No | True | Enables or disables SafeSearch upstream. |
-| `include_rank` | boolean | No | False | Appends the absolute rank index to the response object. |
-| `fields` | string | No | None | Comma separated list of fields to return. Overrides default fields. Available fields: url, title, description, source, rank, provider, score. |
+| `include_rank` | boolean | No | False | Includes the absolute rank index when the `rank` field is selected. |
+| `fields` | string | No | None | Comma separated list of fields to return. Overrides default fields. Available fields: url, title, description, source, rank, provider, providers, score, published_date. |
 
 ### Responses
 
@@ -52,7 +52,7 @@ Returned when the query is empty or invalid fields are requested.
 
 #### 429 Too Many Requests
 
-Returned when the rate limit of 60 requests per minute is exceeded.
+Returned when the rate limit of 30 requests per minute is exceeded.
 
 #### 503 Service Unavailable
 

@@ -10,7 +10,7 @@ The lifecycle of an Atlas request is deterministic:
 2. **Orchestration**: The `search_service` within `app/services/search.py` manages the concurrent execution of upstream providers.
 3. **Provider Fetching**: Providers in `app/providers/search/` (Bing, Brave, DuckDuckGo, Yahoo) translate the query into upstream requests.
 4. **Processing and Deduplication**: The `app/services/dedupe.py` module cleans descriptions, normalizes URLs, and merges duplicated results to calculate provider frequency.
-5. **Ranking**: The `app/services/ranker.py` module takes the deduplicated results, evaluates intent, and assigns scores based on relevance, quality, and diversity signals.
+5. **Ranking**: The `app/services/ranker.py` module takes the deduplicated results, evaluates intent, and assigns scores based on relevance, quality, authority, and diversity signals.
 6. **Response**: The ranked results are paginated and stripped of unrequested fields before being returned as a JSON response.
 
 ## Directory Structure
@@ -23,6 +23,7 @@ The lifecycle of an Atlas request is deterministic:
 * `app/routes/search.py`: HTTP endpoint definitions.
 * `app/services/`: Core business logic modules.
   * `dedupe.py`: Normalization and deduplication.
+  * `authority.py`: Domain authority, official-site, and metadata-noise scoring.
   * `diversity.py`: Domain diversity constraints.
   * `freshness.py`: Recency based scoring adjustments.
   * `intent.py`: Query classification.
