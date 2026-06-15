@@ -1,52 +1,37 @@
 # Architecture
 
-Atlas utilizes a strict, infrastructure-oriented architectural flow:
+Atlas employs a strictly linear and modular architecture. The design prioritizes clear boundaries of responsibility. The system is stateless and relies entirely on synchronous and asynchronous orchestration of internal modules.
 
-`Route -> Service -> Provider`
+## Request Lifecycle
 
-This ensures a clear separation of concerns where HTTP boundaries do not leak into business logic, and business logic does not directly interface with external network calls.
+The lifecycle of an Atlas request is deterministic:
 
-## Components
+1. **Routing**: The `app/routes/search.py` module receives the incoming HTTP request. It validates query parameters, limits, and pagination variables.
+2. **Orchestration**: The `search_service` within `app/services/search.py` manages the concurrent execution of upstream providers.
+3. **Provider Fetching**: Providers in `app/providers/search/` (Bing, Brave, DuckDuckGo, Yahoo) translate the query into upstream requests.
+4. **Processing and Deduplication**: The `app/services/dedupe.py` module cleans descriptions, normalizes URLs, and merges duplicated results to calculate provider frequency.
+5. **Ranking**: The `app/services/ranker.py` module takes the deduplicated results, evaluates intent, and assigns scores based on relevance, quality, authority, and diversity signals.
+6. **Response**: The ranked results are paginated and stripped of unrequested fields before being returned as a JSON response.
 
-### Routes (`app/routes/`)
-Routes are exclusively responsible for:
-- Path and query parameter validation
-- Invoking the underlying service layer
-- Handling and wrapping service exceptions into HTTP responses
+## Directory Structure
 
-### Services (`app/services/`)
-Services manage the core orchestration.
-- **Aggregation**: Executing multiple provider tasks (often asynchronously).
-- **Normalization**: Standardizing data shapes and validating cross-parameters (e.g., date ranges).
-- **Deduplication**: Removing identical results (e.g., canonical URL matching).
-- **Ranking**: Scoring and ordering results globally.
+* `app/config.py`: Centralized configuration variables.
+* `app/main.py`: FastAPI application entry point.
+* `app/models.py`: Pydantic models for type safety.
+* `app/middleware/limits.py`: Rate limiting definitions.
+* `app/providers/search/`: Upstream engine adapters.
+* `app/routes/search.py`: HTTP endpoint definitions.
+* `app/services/`: Core business logic modules.
+  * `dedupe.py`: Normalization and deduplication.
+  * `authority.py`: Domain authority, official-site, and metadata-noise scoring.
+  * `diversity.py`: Domain diversity constraints.
+  * `freshness.py`: Recency based scoring adjustments.
+  * `intent.py`: Query classification.
+  * `normalize.py`: Title and description normalization.
+  * `quality.py`: Structural metadata evaluation.
+  * `ranker.py`: The final scoring pipeline.
+  * `relevance.py`: Textual relevance and query coverage.
+  * `search.py`: High level provider orchestration.
+* `app/utils/urls.py`: URL parsing and normalization utilities.
 
-### Providers (`app/providers/`)
-Providers are low-level backend adapters.
-- Fetching raw data from an upstream source (e.g., Yahoo, DuckDuckGo, PyGoogleNews).
-- Applying provider-specific pagination logic.
-- Returning raw, standardized dictionaries to the service.
-
-## Orchestration Flow
-
-### Search
-1. `Route` validates parameters.
-2. `Service` fires `asyncio.gather` on primary `Providers` (e.g., Bing, Brave).
-3. If primary results are sparse, the `Service` fires fallback `Providers`.
-4. `Service` normalizes URLs and strips tracking parameters.
-5. `Service` scores and ranks results.
-6. `Route` returns the final paginated JSON to the client.
-
-### Finance
-1. `Route` validates parameters (e.g., ticker symbol).
-2. `Service` calls the Yahoo Finance provider adapter.
-3. `Provider` handles safe dict access, gracefully falling back to historical 1-day/2-day averages if exact current prices are missing.
-4. `Service` maps and normalizes requested fields.
-5. `Route` returns the structured market data.
-
-### News
-1. `Route` validates parameter shapes.
-2. `Service` strictly enforces logical boundaries (e.g., `from_date <= to_date`).
-3. `Provider` (Headlines) aggregates headlines via PyGoogleNews logic.
-4. `Service` tags items with proper category contexts (e.g., falling back to `"top"`).
-5. `Route` returns the structured JSON and metadata.
+Each module has a single, explicit responsibility.

@@ -1,21 +1,35 @@
 # Providers
 
-Providers in Atlas serve strictly as data extraction adapters. They isolate upstream dependencies (like `ddgs` or `yfinance`) from the internal core infrastructure.
+Atlas relies on a series of upstream providers to source initial search results. These providers act as headless adapters, securely formatting and executing requests to external search engines.
 
-## Search Providers
+## Overview
 
-Atlas implements the following backend adapters using the `ddgs` library. They are not direct native engine APIs, but adapters wrapping the library's scraping capabilities:
-- **Bing** (Primary)
-- **Brave** (Primary)
-- **DuckDuckGo** (Fallback)
-- **Yahoo** (Fallback)
+Providers are located in the `app/providers/search/` directory. They isolate the core Atlas engine from the specific implementation details of external APIs.
 
-Providers are restricted from performing deduplication or ranking. Their only responsibility is to execute network calls, handle pagination to the limit, and yield raw results.
+The current implementation uses the following adapters:
 
-## Finance Providers
+* `bing.py`
+* `brave.py`
+* `duckduckgo.py`
+* `yahoo.py`
 
-- **Yahoo** (`app/providers/finance/yahoo.py`): Built atop `yfinance`. This adapter handles real-time stock quotes, 52-week metrics, and graceful fallbacks for missing `previousClose` and `currentPrice` values via short-term historical aggregation. It strictly guarantees stable array return types.
+## Tiered Execution
 
-## News Providers
+To maintain speed and limit rate limit exhaustion, Atlas executes provider requests in a tiered format within `app/services/search.py`.
 
-- **Headlines** (`app/providers/news/headlines.py`): Built atop `pygooglenews`. Aggregates topical or categorical headlines globally. It extracts summaries and publication dates but does *not* behave as a full article-scraping engine. It focuses exclusively on headline metadata orchestration.
+### Tier 1
+Atlas initiates concurrent, asynchronous requests to Bing and Brave. These providers are generally faster and return highly relevant initial result sets. If Tier 1 yields sufficient unique URLs to satisfy the requested payload size, the provider orchestration concludes.
+
+### Tier 2
+If the resulting unique URLs from Tier 1 fall below the configured threshold, Atlas falls back to Tier 2 providers (DuckDuckGo and Yahoo). These are executed concurrently to backfill the missing results.
+
+## Adapter Architecture
+
+Each provider adapter must implement a single public asynchronous function responsible for:
+
+1. Accepting the query string, region, SafeSearch parameter, and maximum result limit.
+2. Executing the remote request using `ddgs`.
+3. Parsing the external response into a standardized list of dictionaries containing `title`, `url`, `description`, `source`, and `provider`.
+4. Returning the parsed list to the orchestrator.
+
+If a provider fails, times out, or returns invalid data, the exception is caught by the orchestration layer. A warning is logged, and Atlas gracefully proceeds with the results gathered from the successful providers.

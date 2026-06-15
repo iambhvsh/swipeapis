@@ -1,23 +1,45 @@
 # Ranking
 
-Atlas employs an internal global scoring engine to ensure relevance and diversity after aggregation.
+The Atlas ranking engine calculates scores by evaluating multiple independent signals. The final rank of a result is deterministic and strictly dependent on its cumulative score.
 
-## Scoring Flow
+## The Ranking Pipeline
 
-Once results are aggregated and deduplicated, they pass through the `rank_results` function (`app/services/ranking.py`).
+Ranking occurs in `app/services/ranker.py` and proceeds in the following sequence:
 
-1. **Provider Weighting**
-   - Each provider carries a base weight.
-   - Example: Bing (100), Brave (90), DuckDuckGo (70), Yahoo (50).
+### 1. Intent Classification
+The query is analyzed by `app/services/intent.py` to determine its intent category: freshness, local, transactional, navigational, informational, ambiguous, or entity. This classification determines which specialized boosts apply.
 
-2. **Original Position Penalty**
-   - Results retrieved higher up on a provider's page receive a smaller penalty.
-   - `penalty = original_rank * 2`.
+### 2. Relevance Scoring
+Relevance evaluates the text metadata.
+* Calculates query term coverage within the title, URL, and description.
+* Applies phrase matching.
+* Evaluates title purity to penalize keyword stuffing.
 
-3. **Duplicate Frequency Bonus**
-   - If a canonical URL appears across multiple providers, it is considered more relevant.
-   - `bonus = (frequency - 1) * 15`.
+### 3. Quality Scoring
+Quality scoring occurs in `app/services/quality.py`. It does not analyze content relevance. It strictly evaluates structural health:
+* Does the title exist? Is it a reasonable length?
+* Is the URL well formed? Is the path excessively deep?
+* Does the description exist? Is it long enough to be useful?
 
-4. **Global Sorting**
-   - The final score is calculated: `base_score - penalty + bonus`.
-   - Results are sorted descending and assigned a final, global `rank`.
+### 4. Provider and Frequency Scoring
+Scores are augmented based on the reputation of the origin provider and the cross provider agreement.
+* If multiple providers return the same URL, it is awarded a frequency multiplier.
+* A base score is established using Reciprocal Rank Fusion based on the URL's original position from the upstream provider.
+
+### 5. Authority Scoring
+
+Authority scoring boosts official compact-domain matches, trusted reference sources, and official homepages. It also applies penalties to configured low-authority domains and noisy aggregated titles.
+
+### 6. Intent Specific Boosts
+If the query indicates navigational, entity, or ambiguous intent, the system applies heavy boosts to official domains matching the query terms. If the query indicates freshness intent, the system applies a boost for dates or recent time indicators parsed from the metadata.
+
+### 7. Safety Penalties
+Severe point deductions are applied to results lacking a title, URL, or description.
+
+### 8. Diversity Enforcement
+Results are sorted by score, then passed to `app/services/diversity.py`.
+* Results from a single domain are capped at a strict maximum.
+* Subsequent results from the same domain receive compounding score penalties.
+
+### 9. Final Sort
+The final array is sorted by the diversified score, assigned a strict index rank, and returned.

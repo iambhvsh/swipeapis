@@ -1,104 +1,65 @@
-# API
+# API Reference
 
-## Search
+Atlas exposes a single, straightforward search endpoint.
+
+## The Search Endpoint
 
 `GET /search`
 
-Executes an orchestrated metasearch query with tiered fallback and ranking.
+Executes a federated search across all active providers, deduplicates the results, ranks them according to configured heuristics, and returns a paginated JSON response.
 
-### Parameters
-- `q` (required): The search string.
-- `num_results` (optional): Maximum results (default `10`, capped internally).
-- `start` (optional): Offset pagination.
-- `language` (optional): e.g., `en`, `es`.
-- `safe` (optional): SafeSearch boolean.
-- `fields` (optional): Comma-separated output filter (e.g., `url,title,description,source,rank`).
-- `include_rank` (optional): Boolean.
+### Query Parameters
 
-### Response
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `q` | string | Yes | None | The search query string. Cannot be empty. |
+| `num_results` | integer | No | 10 | The maximum number of results to return. Minimum is 1, maximum is 100. |
+| `start` | integer | No | 0 | The starting index of the results. Used for pagination. |
+| `language` | string | No | "en" | The language code to use for the search. Supports en, es, fr, de, ja, zh, ru, pt, it. |
+| `safe` | boolean | No | True | Enables or disables SafeSearch upstream. |
+| `include_rank` | boolean | No | False | Includes the absolute rank index when the `rank` field is selected. |
+| `fields` | string | No | None | Comma separated list of fields to return. Overrides default fields. Available fields: url, title, description, source, rank, provider, providers, score, published_date. |
+
+### Responses
+
+#### 200 OK
+
+Returns the structured search results.
+
 ```json
 {
+  "total_count": 1,
   "results": [
     {
-      "url": "https://example.com",
-      "title": "Example",
-      "description": "An example description.",
-      "source": "example.com"
+      "url": "https://en.wikipedia.org/wiki/Atlas",
+      "title": "Atlas",
+      "description": "An atlas is a collection of maps...",
+      "source": "en.wikipedia.org"
     }
   ]
 }
 ```
 
-## Finance
+#### 400 Bad Request
 
-`GET /finance/{ticker}`
+Returned when the query is empty or invalid fields are requested.
 
-Fetches market data and historical pricing for a stock ticker.
-
-### Parameters
-- `ticker` (required): Market ticker symbol (e.g., `AAPL`).
-- `fields` (optional): Comma-separated fields (e.g., `price,market_cap,volume`).
-- `history_days` (optional): Number of historical days to fetch.
-- `start_date` / `end_date` (optional): Range bounds (YYYY-MM-DD).
-- `interval` (optional): Data spacing (e.g., `1d`, `1wk`).
-- `include_recommendations` (optional): Boolean.
-- `adjusted` (optional): Boolean.
-
-### Response
 ```json
 {
-  "ticker": "AAPL",
-  "price": 150.00,
-  "market_cap": 2500000000000,
-  "historical": [
-    {
-      "date": "2023-10-01 00:00:00",
-      "Open": 149.00,
-      "High": 151.00,
-      "Low": 148.50,
-      "Close": 150.00,
-      "Volume": 50000000
-    }
-  ],
-  "recommendations": []
+  "detail": "Search query cannot be empty."
 }
 ```
 
-## News
+#### 429 Too Many Requests
 
-`GET /news`
+Returned when the rate limit of 30 requests per minute is exceeded.
 
-Aggregates recent headlines.
+#### 503 Service Unavailable
 
-### Parameters
-- `q` (optional): Search query.
-- `category` (optional): e.g., `business`, `technology`.
-- `region` (optional): e.g., `US`.
-- `language` (optional): e.g., `en`.
-- `from_date` / `to_date` (optional): Date bounds (YYYY-MM-DD).
-- `num_results` (optional): Max results (default `10`).
-- `start` (optional): Offset pagination.
-- `include_sentiment` (optional): Boolean.
+Returned when all upstream search providers completely fail or time out.
 
-### Response
 ```json
 {
-  "query": "technology",
-  "total_articles": 50,
-  "articles": [
-    {
-      "title": "New Tech Released",
-      "url": "https://news.com/1",
-      "source": "TechNews",
-      "published": "Sun, 01 Jan 2023 12:00:00 GMT",
-      "description": "Summary.",
-      "category": "technology",
-      "language": "en",
-      "region": "US"
-    }
-  ],
-  "metadata": {
-    "generated_at": "2023-01-01T12:00:00Z"
-  }
+  "detail": "All search providers failed to return results."
 }
 ```
